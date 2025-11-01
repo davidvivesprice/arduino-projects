@@ -1,0 +1,64 @@
+#######################################
+# Syntax Coloring Map for Sonos Library
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Sonos                   KEYWORD1
+SonosDevice             KEYWORD1
+SonosConfig             KEYWORD1
+SonosResult             KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin                   KEYWORD2
+end                     KEYWORD2
+isInitialized           KEYWORD2
+discoverDevices         KEYWORD2
+getDiscoveredDevices    KEYWORD2
+getDeviceByName         KEYWORD2
+getDeviceByIP           KEYWORD2
+getDeviceCount          KEYWORD2
+setVolume               KEYWORD2
+getVolume               KEYWORD2
+increaseVolume          KEYWORD2
+decreaseVolume          KEYWORD2
+setMute                 KEYWORD2
+play                    KEYWORD2
+pause                   KEYWORD2
+stop                    KEYWORD2
+next                    KEYWORD2
+previous                KEYWORD2
+setConfig               KEYWORD2
+getConfig               KEYWORD2
+getErrorString          KEYWORD2
+setDeviceFoundCallback	KEYWORD2
+setLogCallback          KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+name                    KEYWORD3
+ip                      KEYWORD3
+discoveryTimeoutMs      KEYWORD3
+soapTimeoutMs           KEYWORD3
+maxRetries              KEYWORD3
+discoveryPort           KEYWORD3
+enableLogging           KEYWORD3
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SUCCESS                 LITERAL1
+ERROR_NETWORK           LITERAL1
+ERROR_TIMEOUT           LITERAL1
+ERROR_INVALID_DEVICE    LITERAL1
+ERROR_SOAP_FAULT        LITERAL1
+ERROR_NO_MEMORY         LITERAL1
+ERROR_INVALID_PARAM     LITERAL1

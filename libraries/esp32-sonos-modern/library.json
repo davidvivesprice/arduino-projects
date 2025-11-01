@@ -1,0 +1,35 @@
+{
+  "name": "Sonos",
+  "version": "1.0.0",
+  "description": "Control Sonos speakers from ESP32 via WiFi",
+  "keywords": "sonos, esp32, wifi, speaker, control, audio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rupakpoddar/ESP32Sonos.git"
+  },
+  "authors": [
+    {
+      "name": "Rupak Poddar",
+      "email": "rupakpoddarofficial@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Rupakpoddar/ESP32Sonos",
+  "dependencies": {
+    "bblanchon/ArduinoJson": "^6.0.0"
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "examples": "examples/*/*.[iI][nN][oO]",
+  "export": {
+    "include": [
+      "src/*",
+      "examples/*",
+      "library.properties",
+      "keywords.txt",
+      "LICENSE",
+      "README.md"
+    ]
+  }
+}
