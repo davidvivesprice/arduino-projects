@@ -290,7 +290,8 @@ void setup() {
 
   // Initialize HomeSpan
   homeSpan.setLogLevel(0);  // 0=minimal spam, 1=normal, 2=verbose
-  homeSpan.begin(Category::Television, DEVICE_NAME, HOSTNAME, "EncoderRemote-v1", SETUP_CODE);
+  homeSpan.setPairingCode(SETUP_CODE);  // Set custom pairing code
+  homeSpan.begin(Category::Television, DEVICE_NAME);
   homeSpan.setWifiCredentials(WIFI_SSID, WIFI_PASSWORD);
 
   // Factory reset if button held during boot
