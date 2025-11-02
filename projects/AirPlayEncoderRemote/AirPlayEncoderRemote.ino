@@ -8,6 +8,7 @@ constexpr char WIFI_SSID[] = "Happy Valley";
 constexpr char WIFI_PASSWORD[] = "welcomehome";
 constexpr char DEVICE_NAME[] = "Encoder Remote";
 constexpr char HOSTNAME[] = "encoder-remote";  // Shows up in LanScan, router, etc.
+constexpr char SETUP_CODE[] = "35433543";      // HomeKit pairing code (8 digits, format: XXX-XX-XXX)
 constexpr bool WAIT_FOR_SERIAL = true;
 constexpr bool DEBUG_LOGGING = true;
 constexpr bool ENCODER_INVERT = false;
@@ -289,7 +290,7 @@ void setup() {
 
   // Initialize HomeSpan
   homeSpan.setLogLevel(0);  // 0=minimal spam, 1=normal, 2=verbose
-  homeSpan.begin(Category::Television, DEVICE_NAME);
+  homeSpan.begin(Category::Television, DEVICE_NAME, HOSTNAME, "EncoderRemote-v1", SETUP_CODE);
   homeSpan.setWifiCredentials(WIFI_SSID, WIFI_PASSWORD);
 
   // Factory reset if button held during boot
@@ -320,19 +321,25 @@ void setup() {
     remoteKey = new DEV_RemoteKey();
     remoteKey->addLink(tv);  // REQUIRED: Link input source to TV
 
+  // Format setup code as XXX-XX-XXX
+  String formattedCode = String(SETUP_CODE);
+  formattedCode = formattedCode.substring(0,3) + "-" + formattedCode.substring(3,5) + "-" + formattedCode.substring(5,8);
+
   Serial.println("\n\n");
   Serial.println("========================================================");
   Serial.println("       HOMEKIT PAIRING CODE - WRITE THIS DOWN!");
   Serial.println("========================================================");
   Serial.println("");
-  Serial.println("              Setup Code: 466-37-726");
+  Serial.print("              Setup Code: ");
+  Serial.println(formattedCode);
   Serial.println("");
   Serial.println("========================================================");
   Serial.println("  1. Open Home app on iPhone");
   Serial.println("  2. Tap + (top right) -> Add Accessory");
   Serial.println("  3. Tap 'More options...'");
   Serial.println("  4. Select 'Encoder Remote'");
-  Serial.println("  5. Enter code: 466-37-726");
+  Serial.print("  5. Enter code: ");
+  Serial.println(formattedCode);
   Serial.println("========================================================");
   Serial.print("  Network Hostname: ");
   Serial.print(HOSTNAME);
