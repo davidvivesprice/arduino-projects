@@ -291,6 +291,9 @@ void setup() {
   homeSpan.begin(Category::Television, DEVICE_NAME);
   homeSpan.setWifiCredentials(WIFI_SSID, WIFI_PASSWORD);
 
+  // Factory reset if button held during boot
+  homeSpan.setControlPin(Pins::rotarySW);  // Press during boot to reset pairing
+
   // HomeSpan automatically handles mDNS as [HOSTNAME].local
 
   // Create HomeKit Accessory
@@ -333,6 +336,12 @@ void setup() {
   Serial.print("  mDNS: ");
   Serial.print(HOSTNAME);
   Serial.println(".local");
+  Serial.println("========================================================");
+  Serial.println("");
+  Serial.println("  TROUBLESHOOTING:");
+  Serial.println("  - If pairing fails: Type 'E' in Serial Monitor to erase");
+  Serial.println("  - Or hold encoder button during boot for factory reset");
+  Serial.println("");
   Serial.println("========================================================");
   Serial.println("\n");
 }
