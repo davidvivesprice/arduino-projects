@@ -218,7 +218,7 @@ void saveConfiguration() {
 void setupWebServer() {
   // Main page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    String html = R"(
+    String html = R"=====(
 <!DOCTYPE html>
 <html>
 <head>
@@ -368,7 +368,7 @@ void setupWebServer() {
   </script>
 </body>
 </html>
-)";
+)=====";
     request->send(200, "text/html", html);
   });
 
@@ -387,7 +387,7 @@ void setupWebServer() {
     for (int i = 0; i < n; i++) {
       String hostname = MDNS.hostname(i);
       if (hostname.indexOf("wled") >= 0 || hostname.indexOf("WLED") >= 0) {
-        IPAddress ip = MDNS.IP(i);
+        IPAddress ip = MDNS.address(i);
         String ipStr = ip.toString();
 
         Serial.printf("Checking WLED at %s...\n", ipStr.c_str());
