@@ -266,12 +266,12 @@ void setupWebServer() {
   </style>
 </head>
 <body>
-  <h1>🎛️ WLED Controller Setup</h1>
+  <h1>WLED Controller Setup</h1>
   <p>Select segments to control with the encoder:</p>
 
-  <button onclick="scan()" id="scanBtn">🔍 Scan for WLED Devices</button>
-  <button onclick="save()" id="saveBtn" disabled>💾 Save Configuration</button>
-  <button onclick="location.reload()">🔄 Refresh</button>
+  <button onclick="scan()" id="scanBtn">Scan for WLED Devices</button>
+  <button onclick="save()" id="saveBtn" disabled>Save Configuration</button>
+  <button onclick="location.reload()">Refresh</button>
 
   <div id="status">Ready to scan...</div>
   <div id="devices"></div>
@@ -319,7 +319,7 @@ void setupWebServer() {
               data-rgb="${seg.isRGB}">
             <label for="${id}">
               Segment ${seg.id}: ${seg.name}
-              (${seg.leds} LEDs) ${seg.isRGB ? '🌈 RGB' : '⚪ White'}
+              (${seg.leds} LEDs) ${seg.isRGB ? 'RGB' : 'White'}
             </label>
           </div>`;
         });
@@ -358,7 +358,7 @@ void setupWebServer() {
 
       if (response.ok) {
         document.getElementById('status').innerHTML =
-          `<span class="success">✓ Saved ${segments.length} segment(s)! Controller ready.</span>`;
+          `<span class="success">Saved ${segments.length} segment(s)! Controller ready.</span>`;
         setTimeout(() => location.reload(), 2000);
       } else {
         document.getElementById('status').innerHTML =
