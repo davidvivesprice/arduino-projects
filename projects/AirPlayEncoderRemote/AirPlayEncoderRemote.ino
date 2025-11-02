@@ -7,6 +7,7 @@
 constexpr char WIFI_SSID[] = "Happy Valley";
 constexpr char WIFI_PASSWORD[] = "welcomehome";
 constexpr char DEVICE_NAME[] = "Encoder Remote";
+constexpr char HOSTNAME[] = "encoder-remote";  // Shows up in LanScan, router, etc.
 constexpr bool WAIT_FOR_SERIAL = true;
 constexpr bool DEBUG_LOGGING = true;
 constexpr bool ENCODER_INVERT = false;
@@ -282,10 +283,15 @@ void setup() {
 
   Serial.println("Hardware configured");
 
+  // Set WiFi hostname (shows in LanScan, router, etc.)
+  WiFi.setHostname(HOSTNAME);
+
   // Initialize HomeSpan
-  homeSpan.setLogLevel(DEBUG_LOGGING ? 1 : 0);
+  homeSpan.setLogLevel(0);  // 0=minimal spam, 1=normal, 2=verbose
   homeSpan.begin(Category::Television, DEVICE_NAME);
   homeSpan.setWifiCredentials(WIFI_SSID, WIFI_PASSWORD);
+
+  // HomeSpan automatically handles mDNS as [HOSTNAME].local
 
   // Create HomeKit Accessory
   new SpanAccessory();
@@ -307,9 +313,28 @@ void setup() {
     tvSpeaker = new DEV_TelevisionSpeaker();
     remoteKey = new DEV_RemoteKey();
 
-  Serial.println("\n✓ HomeKit setup complete");
-  Serial.println("✓ Scan QR code in Home app to pair");
-  Serial.println("✓ Setup code will be displayed below\n");
+  Serial.println("\n\n");
+  Serial.println("========================================================");
+  Serial.println("       HOMEKIT PAIRING CODE - WRITE THIS DOWN!");
+  Serial.println("========================================================");
+  Serial.println("");
+  Serial.println("              Setup Code: 466-37-726");
+  Serial.println("");
+  Serial.println("========================================================");
+  Serial.println("  1. Open Home app on iPhone");
+  Serial.println("  2. Tap + (top right) -> Add Accessory");
+  Serial.println("  3. Tap 'More options...'");
+  Serial.println("  4. Select 'Encoder Remote'");
+  Serial.println("  5. Enter code: 466-37-726");
+  Serial.println("========================================================");
+  Serial.print("  Network Hostname: ");
+  Serial.print(HOSTNAME);
+  Serial.println(" (for LanScan, router, etc.)");
+  Serial.print("  mDNS: ");
+  Serial.print(HOSTNAME);
+  Serial.println(".local");
+  Serial.println("========================================================");
+  Serial.println("\n");
 }
 
 void loop() {
