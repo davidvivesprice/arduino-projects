@@ -95,6 +95,7 @@ struct DEV_RemoteKey : Service::InputSource {
   DEV_RemoteKey() : Service::InputSource() {
     Serial.println("Configuring Remote Key");
 
+    new Characteristic::Identifier(1);  // REQUIRED for InputSource
     new Characteristic::ConfiguredName("Media Remote");
     new Characteristic::InputSourceType(0);  // Other
     new Characteristic::IsConfigured(1);
@@ -306,7 +307,7 @@ void setup() {
       new Characteristic::SerialNumber("ESP32-001");
       new Characteristic::FirmwareRevision("1.0");
 
-    new Service::Television();
+    SpanService *tv = new Service::Television();
       new Characteristic::Active(1);
       new Characteristic::ActiveIdentifier(1);
       new Characteristic::ConfiguredName(DEVICE_NAME);
@@ -314,7 +315,10 @@ void setup() {
       new Characteristic::RemoteKey();
 
     tvSpeaker = new DEV_TelevisionSpeaker();
+    tvSpeaker->addLink(tv);  // REQUIRED: Link speaker to TV
+
     remoteKey = new DEV_RemoteKey();
+    remoteKey->addLink(tv);  // REQUIRED: Link input source to TV
 
   Serial.println("\n\n");
   Serial.println("========================================================");
