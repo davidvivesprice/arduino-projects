@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.0/SonosEthRemoteP4-v1.0.0.bin",
+  "sha256": "70468f77d3b105c65889e1358b4eebca0cb8365bf62aef0d791183f9d0cf827f",
+  "size": 1035440,
+  "released": "2026-05-25T23:09:33Z",
+  "notes": "Initial OTA-pull baseline. ESP32 dual-partition auto-rollback enabled."
+}

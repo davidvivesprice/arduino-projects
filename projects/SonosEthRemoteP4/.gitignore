@@ -1,0 +1,18 @@
+# arduino-cli compile output
+build/
+
+# factory backup (16MB binary)
+p4-factory-backup/
+
+# generated insert outputs — only the source (build_inserts.py + logo SVG)
+# is checked in; rendered PDFs/HTMLs/PNGs are derived
+inserts/*.pdf
+inserts/mstbed.html
+inserts/mstbth.html
+inserts/grkit.html
+inserts/grliv.html
+inserts/fam.html
+inserts/bed2.html
+inserts/bed3.html
+inserts/all_cards.html
+inserts/*.png
