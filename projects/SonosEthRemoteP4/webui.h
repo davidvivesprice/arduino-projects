@@ -953,6 +953,47 @@ static void serveApiRooms() {
   web.send(200, "application/json", json);
 }
 
+// Atomically set prefix + slug in one shot. Replaces the older two-call dance
+// of /api/setprefix → reboot → /api/setroom → reboot. Single restart at the end.
+static void serveApiSetup() {
+  String prefix = web.hasArg("prefix") ? web.arg("prefix") : String("");
+  String slug   = web.hasArg("slug")   ? web.arg("slug")   : String("");
+  if (prefix.length() > 0 && !isValidRoomSlug(prefix)) {
+    web.send(400, "text/plain", "invalid prefix");
+    return;
+  }
+  if (slug.length() > 0 && !isValidRoomSlug(slug)) {
+    web.send(400, "text/plain", "invalid slug");
+    return;
+  }
+  if (!saveHostPrefix(prefix) || !saveRoomSlug(slug)) {
+    web.send(500, "text/plain", "NVS write failed");
+    return;
+  }
+  logEvent("setup prefix='%s' slug='%s' — restarting",
+    prefix.length() ? prefix.c_str() : "(default)",
+    slug.length() ? slug.c_str() : "(cleared)");
+  web.send(200, "application/json", "{\"ok\":true,\"restarting\":true}");
+  delay(250);
+  ESP.restart();
+}
+
+static void serveApiSetPrefix() {
+  String prefix = web.hasArg("p") ? web.arg("p") : (web.hasArg("prefix") ? web.arg("prefix") : String(""));
+  if (prefix.length() > 0 && !isValidRoomSlug(prefix)) {
+    web.send(400, "text/plain", "invalid prefix");
+    return;
+  }
+  if (!saveHostPrefix(prefix)) {
+    web.send(500, "text/plain", "NVS write failed");
+    return;
+  }
+  logEvent("prefix set to '%s' — restarting", prefix.length() ? prefix.c_str() : "(default)");
+  web.send(200, "application/json", "{\"ok\":true,\"restarting\":true}");
+  delay(250);
+  ESP.restart();
+}
+
 static void serveApiSetRoom() {
   String slug = web.hasArg("slug") ? web.arg("slug") : String("");
   // Empty slug = clear assignment (board returns to sonos-p4-XXXX fallback).
@@ -1157,6 +1198,8 @@ static void initWebUI(const char* hostname) {
   web.on("/api/reset", serveApiReset);
   web.on("/api/rooms", serveApiRooms);
   web.on("/api/setroom", serveApiSetRoom);
+  web.on("/api/setprefix", serveApiSetPrefix);
+  web.on("/api/setup", serveApiSetup);
   web.on("/api/restart", serveApiRestart);
   web.on("/api/setinvert", serveApiSetInvert);
   web.on("/api/setstep", serveApiSetStep);

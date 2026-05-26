@@ -274,7 +274,7 @@ void loop() {
       discoverSpeakers();
       restoreSpeaker();
     }
-    updaterTick(ethConnected);
+    updaterTick(ethConnected, hostname, ssReady, ssReady ? SS_EXPECT_VER : 0);
   }
 
   delay(2);

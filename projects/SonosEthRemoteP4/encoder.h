@@ -85,6 +85,44 @@ String        lastFiredGid    = "";
 bool          lastFiredOk     = false;
 unsigned long lastFiredMs     = 0;
 
+// Per-board ring buffer of recent gestures so the fleet hub can show a "pulse"
+// — every click / multi-click / hold from every board in one unified feed.
+// Drained on each fleetReport call. Capped — heavy usage in a 5-min window
+// past this size drops the oldest entries.
+struct FleetEvent {
+  unsigned long ms;       // board millis() at event time
+  char          gid[8];   // "1c", "2c+h", "hold", "lh", etc.
+  bool          ok;       // did the mapped action succeed?
+};
+static constexpr uint8_t FLEET_EVT_MAX = 24;
+static FleetEvent fleetEvents[FLEET_EVT_MAX];
+static uint8_t    fleetEvtCount = 0;
+
+inline void fleetLogGesture(const char* gid, bool ok) {
+  if (fleetEvtCount < FLEET_EVT_MAX) {
+    FleetEvent& e = fleetEvents[fleetEvtCount++];
+    e.ms = millis();
+    strncpy(e.gid, gid, sizeof(e.gid) - 1);
+    e.gid[sizeof(e.gid) - 1] = 0;
+    e.ok = ok;
+  } else {
+    // Drop oldest by shifting one down. Cheap at 24 entries.
+    for (uint8_t i = 0; i < FLEET_EVT_MAX - 1; i++) fleetEvents[i] = fleetEvents[i + 1];
+    FleetEvent& e = fleetEvents[FLEET_EVT_MAX - 1];
+    e.ms = millis();
+    strncpy(e.gid, gid, sizeof(e.gid) - 1);
+    e.gid[sizeof(e.gid) - 1] = 0;
+    e.ok = ok;
+  }
+}
+
+inline void fleetEventsClear() { fleetEvtCount = 0; }
+
+// Rotation activity — coarse for the pulse: total count + when last detent
+// happened. The dashboard converts the timestamp into "Xs ago".
+volatile unsigned long lastRotationMs = 0;
+uint32_t fleetRotEvents = 0;  // total detents (user-perceptible clicks) since boot
+
 // =============================================================================
 // Rotation — Seesaw firmware already debounces & decodes the quadrature, so
 // getEncoderDelta() returns net detent change since the last call. We just
@@ -104,10 +142,12 @@ static void processEncoder() {
   if (encoderInvert) det = -det;
   if (det != 0) {
     lastActivityMs = millis();
+    lastRotationMs = millis();
     fractional += det;
     int detents = fractional / TRANSITIONS_PER_DETENT;
     fractional -= detents * TRANSITIONS_PER_DETENT;
     pending += detents;
+    if (detents != 0) fleetRotEvents += (detents > 0 ? detents : -detents);
   }
 
   if (!spk.connected()) return;
@@ -153,6 +193,7 @@ static void fireGesture(uint8_t clicks, bool withHold, bool longHold) {
     lastFiredGid = String(gid);
     lastFiredOk = false;
     lastFiredMs = millis();
+    fleetLogGesture(gid, false);
     return;
   }
   GestureMap m = getMapping(gid);
@@ -162,6 +203,7 @@ static void fireGesture(uint8_t clicks, bool withHold, bool longHold) {
     lastFiredGid = String(gid);
     lastFiredOk = false;   // unmapped is "didn't do anything" — flash red
     lastFiredMs = millis();
+    fleetLogGesture(gid, false);
     return;
   }
   logEvent("gesture %s -> %s", gid, aid.c_str());
@@ -169,6 +211,7 @@ static void fireGesture(uint8_t clicks, bool withHold, bool longHold) {
   lastFiredGid = String(gid);
   lastFiredOk  = ok;
   lastFiredMs  = millis();
+  fleetLogGesture(gid, ok);
   if (!aid.startsWith("enter_")) exitMode();
 }
 

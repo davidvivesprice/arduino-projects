@@ -16,3 +16,4 @@ inserts/bed2.html
 inserts/bed3.html
 inserts/all_cards.html
 inserts/*.png
+config_secrets.h

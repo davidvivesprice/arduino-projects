@@ -22,6 +22,7 @@
 #include <ArduinoJson.h>
 #include "mbedtls/sha256.h"
 #include "config.h"
+#include "fleet.h"
 
 void logEvent(const char* fmt, ...);  // defined in webui.h
 
@@ -232,7 +233,8 @@ inline bool checkForUpdate(bool force = false) {
 }
 
 // ── Schedule periodic checks ───────────────────────────────────────────────
-inline void updaterTick(bool ethConnected) {
+inline void updaterTick(bool ethConnected, const char* hostname,
+                         bool i2cOk, uint16_t ssPid) {
   if (!ethConnected) return;
   // First check: 60s after boot (gives DHCP, mDNS, speaker discovery time).
   // Subsequent checks: every T_UPDATE_CHECK + jitter.
@@ -240,5 +242,11 @@ inline void updaterTick(bool ethConnected) {
   if (millis() < nextCheck) return;
   long jitter = (long)random(-(long)T_UPDATE_JITTER, (long)T_UPDATE_JITTER);
   nextCheck = millis() + T_UPDATE_CHECK + jitter;
+
+  // Phone home to the fleet hub first (it's cheap and we don't want the
+  // possibly-restarting OTA flow to skip it).
+  fleetReport(hostname, i2cOk, ssPid);
+
+  // Then check for new firmware. May reboot mid-call on success.
   checkForUpdate(false);
 }

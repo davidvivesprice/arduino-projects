@@ -73,6 +73,24 @@ constexpr char UPDATE_MANIFEST_URL[] =
 constexpr unsigned long T_UPDATE_CHECK    = 5UL * 60UL * 1000UL;   // 5 min
 constexpr unsigned long T_UPDATE_JITTER   = 30UL * 1000UL;         // ±30s
 
+// ── Fleet Hub — boards POST a tiny status JSON every 5 min so the user
+// can see liveness + i2c + speaker status across the whole fleet from any
+// browser, no VPN. Piggybacks on the updater tick. Cloudflare Worker side.
+constexpr char FLEET_HUB_URL[] =
+  "https://sonos-fleet-hub.davidvivesprice.workers.dev/report";
+
+// Shared secret comes from config_secrets.h (gitignored). If the file isn't
+// present at build time the secret stays empty and reporting is skipped — the
+// firmware still works, it just doesn't phone home. release.sh writes the
+// header from .secret.local before each build.
+#if __has_include("config_secrets.h")
+  #include "config_secrets.h"
+#endif
+#ifndef FLEET_HUB_SECRET_STR
+  #define FLEET_HUB_SECRET_STR ""
+#endif
+constexpr char FLEET_HUB_SECRET[] = FLEET_HUB_SECRET_STR;
+
 inline void dbg(const char* fmt, ...) {
   if (!DEBUG_LOG) return;
   char buf[128];

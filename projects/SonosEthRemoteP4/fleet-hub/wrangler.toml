@@ -1,0 +1,24 @@
+name = "sonos-fleet-hub"
+main = "src/worker.js"
+compatibility_date = "2026-05-01"
+account_id = "2da0d662dbdb4009c7cca58282e495d6"
+
+# KV namespaces — set via `wrangler kv namespace create ...` before first deploy.
+# The IDs below are placeholders; `wrangler deploy` will fail until they're set.
+[[kv_namespaces]]
+binding = "STATE"
+id = "b8f297c6768540678ebada5d0f53ab9a"
+
+# Worker → public on vivessato zone via a custom route (e.g. fleet.vivessato.com).
+# Routes configured separately so deploy works without DNS setup first.
+
+# Vars (non-secret config)
+[vars]
+LATEST_TTL_SECONDS = "1800"        # 30 min — boards age out of live view if silent
+STALE_THRESHOLD_SECONDS = "600"    # 10 min — dashboard marks yellow after this
+DEAD_THRESHOLD_SECONDS = "900"     # 15 min — triggers alert
+
+# Secrets set via `wrangler secret put`:
+#   INGEST_SECRET     — boards send this in X-Fleet-Auth header
+#   PUSHOVER_USER     — Pushover user key
+#   PUSHOVER_TOKEN    — Pushover app token (added in alert phase)
