@@ -1,8 +1,8 @@
 {
-  "version": "1.0.1",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.1/SonosEthRemoteP4-v1.0.1.bin",
-  "sha256": "d8d20e6a84b69e1fcc3fca44402b970d4a296c0dd0d100b03c15b3fd826884ab",
-  "size": 1039168,
-  "released": "2026-05-26T00:12:51Z",
-  "notes": "Reliability + per-client deploys. Speaker-unreachable false-positive fix, SOAP errors visible in /api/log, per-gesture UI flash with success/failure, configurable hostname prefix (phil-liv etc), 5-min manifest poll for snappy remote updates."
+  "version": "1.0.2",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.2/SonosEthRemoteP4-v1.0.2.bin",
+  "sha256": "c72a89bfbf7a0fe391d2e7751f83cc239679f82cb4170d5f9b1f14118681b67f",
+  "size": 1043136,
+  "released": "2026-05-26T02:35:52Z",
+  "notes": "Fleet observability — live hub dashboard with per-board liveness, i2c/speaker status, rotation counters, and a unified pulse feed of every gesture across all boards. Hub at sonos-fleet-hub.davidvivesprice.workers.dev."
 }
