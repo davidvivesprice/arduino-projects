@@ -1,8 +1,8 @@
 {
-  "version": "1.0.2",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.2/SonosEthRemoteP4-v1.0.2.bin",
-  "sha256": "c72a89bfbf7a0fe391d2e7751f83cc239679f82cb4170d5f9b1f14118681b67f",
-  "size": 1043136,
-  "released": "2026-05-26T02:35:52Z",
-  "notes": "Fleet observability — live hub dashboard with per-board liveness, i2c/speaker status, rotation counters, and a unified pulse feed of every gesture across all boards. Hub at sonos-fleet-hub.davidvivesprice.workers.dev."
+  "version": "1.0.3",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.3/SonosEthRemoteP4-v1.0.3.bin",
+  "sha256": "8424d586469daaf432418cef26bad6d23fa1cc0903ba68a60f6e352e476540df",
+  "size": 1043584,
+  "released": "2026-05-26T05:37:16Z",
+  "notes": "Pulse goes live: activity-triggered reports (≤25s after click/rotation), rotation bursts in pulse feed, prominent FW version in per-board web UI, CHANGELOG.md added."
 }

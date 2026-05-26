@@ -56,7 +56,7 @@ constexpr bool DEBUG_LOG = true;
 // ── Firmware versioning + OTA pull-update ─────────────────────────────────
 // Bumped by ./release.sh. Used for boot log, /api/status, and the OTA pull
 // updater's "newer than mine?" comparison against the manifest's `version`.
-constexpr char FW_VERSION[] = "1.0.2";
+constexpr char FW_VERSION[] = "1.0.3";
 
 // Public manifest hosted in the GitHub repo. raw.githubusercontent.com is
 // HTTPS, CDN-cached, and requires no auth for public repos. The manifest
