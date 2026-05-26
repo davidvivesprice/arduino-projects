@@ -35,11 +35,12 @@ usage() {
 
 [[ $# -eq 0 || "${1:-}" == "--help" ]] && usage
 
-REBUILD=0; ROOM_ONLY=0
+REBUILD=0; ROOM_ONLY=0; PREFIX=""
 while [[ "${1:-}" == --* ]]; do
   case "$1" in
     --rebuild)   REBUILD=1; shift ;;
     --room-only) ROOM_ONLY=1; shift ;;
+    --prefix)    PREFIX="${2:-}"; shift 2 ;;
     --list)      show_list; exit 0 ;;
     --help)      usage ;;
     *)           echo "unknown flag $1"; usage ;;
@@ -49,6 +50,7 @@ done
 SLUG="${1:-}"
 [[ -z "$SLUG" ]] && { echo "missing slug"; exit 1; }
 [[ "$SLUG" =~ ^[a-z0-9-]{1,16}$ ]] || { echo "invalid slug '$SLUG' (a-z 0-9 -, ≤16 chars)"; exit 1; }
+[[ -n "$PREFIX" && ! "$PREFIX" =~ ^[a-z0-9-]{1,16}$ ]] && { echo "invalid prefix '$PREFIX'"; exit 1; }
 
 # Warn on uncanonical slugs.
 known=0
@@ -57,7 +59,11 @@ for s in "${KNOWN_SLUGS[@]}"; do [[ "$s" == "$SLUG" ]] && known=1; done
 
 PORT=$(ls /dev/cu.usbmodem* 2>/dev/null | head -n1 || true)
 [[ -z "$PORT" ]] && { echo "no /dev/cu.usbmodem* found — is the board plugged in via USB?"; exit 1; }
-echo "port: $PORT  → assigning room '$SLUG'"
+if [[ -n "$PREFIX" ]]; then
+  echo "port: $PORT  → assigning prefix='$PREFIX' slug='$SLUG' → ${PREFIX}-${SLUG}.local"
+else
+  echo "port: $PORT  → assigning slug '$SLUG' → tpsvc-${SLUG}.local (default prefix)"
+fi
 
 if [[ $ROOM_ONLY -eq 0 ]]; then
   if [[ $REBUILD -eq 1 || ! -f "$BIN" ]]; then
@@ -77,11 +83,16 @@ fi
 # up to 12 seconds. The firmware ACK-restarts on first successful read; once
 # the board reboots the CDC drops and subsequent writes silently fail, which
 # is the intended exit signal.
-echo "sending ROOM:$SLUG (retrying for up to 12s)..."
-python3 - "$PORT" "$SLUG" <<'PY'
+if [[ -n "$PREFIX" ]]; then
+  CMD="SETUP:${PREFIX}:${SLUG}"
+else
+  CMD="ROOM:${SLUG}"
+fi
+echo "sending ${CMD} (retrying for up to 12s)..."
+python3 - "$PORT" "$CMD" <<'PY'
 import os, sys, time, errno
-port, slug = sys.argv[1], sys.argv[2]
-payload = (f"ROOM:{slug}\r\n").encode()
+port, cmd = sys.argv[1], sys.argv[2]
+payload = (f"{cmd}\r\n").encode()
 deadline = time.time() + 12.0
 sent = 0
 fd = None
@@ -110,4 +121,8 @@ if sent == 0:
 print(f"  sent {sent} times — port stayed open the whole time (firmware may have already restarted earlier ✓)")
 PY
 
-echo "done. Unplug USB, plug into PoE → expected mDNS: tpsvc-${SLUG}.local"
+if [[ -n "$PREFIX" ]]; then
+  echo "done. Unplug USB, plug into PoE → expected mDNS: ${PREFIX}-${SLUG}.local"
+else
+  echo "done. Unplug USB, plug into PoE → expected mDNS: tpsvc-${SLUG}.local"
+fi

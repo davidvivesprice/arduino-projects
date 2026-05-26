@@ -3,6 +3,8 @@
 #include <Preferences.h>
 #include "config.h"
 
+void logEvent(const char* fmt, ...);  // defined in webui.h
+
 // =============================================================================
 // SonosController — direct SOAP, no library dependency
 // =============================================================================
@@ -36,8 +38,20 @@ public:
 
     String resp;
     int code = http.POST(body);
-    if (code == 200) resp = http.getString();
-    else dbg("SOAP %s -> %d", action, code);
+    if (code == 200) {
+      resp = http.getString();
+    } else {
+      String errBody = http.getString();
+      // Surface SOAP failures in the web log so we can see the source's
+      // refusal (e.g. Sonos Radio rejecting Next with errorCode 701).
+      String fault = tag(errBody, "errorCode");
+      if (fault.length() > 0) {
+        logEvent("SOAP %s -> %d err=%s", action, code, fault.c_str());
+      } else {
+        logEvent("SOAP %s -> HTTP %d", action, code);
+      }
+      dbg("SOAP %s -> %d body=%s", action, code, errBody.c_str());
+    }
     http.end();
     return resp;
   }
@@ -63,9 +77,15 @@ public:
   }
 
   // --- RenderingControl ---
+  // Returns the current Sonos volume (0..100) or -1 if the SOAP call failed
+  // outright (timeout, non-200, missing tag). The -1 sentinel lets callers
+  // distinguish "user legitimately set vol=0" from "speaker unreachable".
   int getVolume() {
-    return tag(rc("GetVolume", "<InstanceID>0</InstanceID><Channel>Master</Channel>"),
-               "CurrentVolume").toInt();
+    String resp = rc("GetVolume", "<InstanceID>0</InstanceID><Channel>Master</Channel>");
+    if (resp.length() == 0) return -1;        // HTTP failure
+    String v = tag(resp, "CurrentVolume");
+    if (v.length() == 0) return -1;           // unexpected response shape
+    return v.toInt();
   }
 
   void setVolume(int vol) {
@@ -89,12 +109,12 @@ public:
                "CurrentMute") == "1";
   }
 
-  void setMute(bool m) {
+  String setMute(bool m) {
     char p[96];
     snprintf(p, sizeof(p),
       "<InstanceID>0</InstanceID><Channel>Master</Channel>"
       "<DesiredMute>%d</DesiredMute>", m ? 1 : 0);
-    rc("SetMute", p);
+    return rc("SetMute", p);
   }
 
   int getBass() {
@@ -138,11 +158,14 @@ public:
   }
 
   // --- AVTransport ---
-  void play()     { av("Play", "<InstanceID>0</InstanceID><Speed>1</Speed>"); }
-  void pause()    { av("Pause", "<InstanceID>0</InstanceID>"); }
-  void stop()     { av("Stop", "<InstanceID>0</InstanceID>"); }
-  void next()     { av("Next", "<InstanceID>0</InstanceID>"); }
-  void previous() { av("Previous", "<InstanceID>0</InstanceID>"); }
+  // Transport actions return the SOAP response body. Empty string means the
+  // call failed (HTTP non-200 or SOAP fault) — callers use this to flag
+  // "did Sonos actually do it?" in the UI / activity log.
+  String play()     { return av("Play", "<InstanceID>0</InstanceID><Speed>1</Speed>"); }
+  String pause()    { return av("Pause", "<InstanceID>0</InstanceID>"); }
+  String stop()     { return av("Stop", "<InstanceID>0</InstanceID>"); }
+  String next()     { return av("Next", "<InstanceID>0</InstanceID>"); }
+  String previous() { return av("Previous", "<InstanceID>0</InstanceID>"); }
   void setPlayMode(const char* mode) {
     char p[96];
     snprintf(p, sizeof(p),
@@ -247,13 +270,14 @@ static bool refreshState() {
   ctrl.ip = spk.ip;
 
   int vol = ctrl.getVolume();
-  bool mute = ctrl.getMute();
-  bool play = ctrl.isPlaying();
-
-  if (vol == 0 && spk.volume > 5) {
-    dbg("refresh failed (vol=0, was %d)", spk.volume);
+  // Real SOAP failure: getVolume() returns -1 (empty response or missing tag).
+  // A *value* of 0 is a legitimate "user cranked it down" — not a failure.
+  if (vol < 0) {
+    dbg("refresh: SOAP failure on getVolume");
     return false;
   }
+  bool mute = ctrl.getMute();
+  bool play = ctrl.isPlaying();
 
   spk.volume = vol;
   spk.muted = mute;
@@ -297,8 +321,8 @@ static bool toggleMute() {
   // local can drift when other controllers (Sonos app) change it.
   bool current = ctrl.getMute();
   bool target = !current;
-  ctrl.setMute(target);
-  // Verify by reading back. If readback fails to flip, surface the failure.
+  String r = ctrl.setMute(target);
+  if (r.length() == 0) return false;  // SOAP rejected
   bool actual = ctrl.getMute();
   spk.muted = actual;
   return actual == target;
@@ -307,7 +331,8 @@ static bool toggleMute() {
 static bool togglePlay() {
   if (!spk.connected()) return false;
   ctrl.ip = spk.ip;
-  if (spk.playing) ctrl.pause(); else ctrl.play();
+  String resp = spk.playing ? ctrl.pause() : ctrl.play();
+  if (resp.length() == 0) return false;     // SOAP rejected (rare for play/pause)
   spk.playing = !spk.playing;
   return true;
 }
@@ -315,15 +340,15 @@ static bool togglePlay() {
 static bool nextTrack() {
   if (!spk.connected()) return false;
   ctrl.ip = spk.ip;
-  ctrl.next();
-  return true;
+  // SOAP returns empty on failure — Sonos Radio + most streaming sources will
+  // reject Next with err=800 (TRANSITION_NOT_AVAILABLE).
+  return ctrl.next().length() > 0;
 }
 
 static bool prevTrack() {
   if (!spk.connected()) return false;
   ctrl.ip = spk.ip;
-  ctrl.previous();
-  return true;
+  return ctrl.previous().length() > 0;
 }
 
 static void selectSpeaker(int idx) {

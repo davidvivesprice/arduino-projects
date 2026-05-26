@@ -20,6 +20,9 @@ static String deviceName;
 extern volatile unsigned long lastActivityMs;
 extern bool encoderInvert;
 extern int  volumeStep;
+extern String        lastFiredGid;
+extern bool          lastFiredOk;
+extern unsigned long lastFiredMs;
 void saveEncoderInvert(bool v);  // implemented in encoder.h
 void saveVolumeStep(int v);      // implemented in encoder.h
 
@@ -88,6 +91,11 @@ body{
 .room .roomhost{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:2px;margin-top:4px;text-transform:lowercase;font-style:normal}
 .room .actdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#2a2a2e;transition:background .1s,box-shadow .1s,transform .1s;flex-shrink:0}
 .room .actdot.live{background:#5dd17b;box-shadow:0 0 14px #5dd17b,0 0 4px #5dd17b;transform:scale(1.15)}
+/* Gesture row flash — green = SOAP success, red = Sonos rejected. */
+@keyframes flashOk { 0% { background: rgba(93,209,123,.45); box-shadow: inset 0 0 24px rgba(93,209,123,.4); } 100% { background: transparent; box-shadow: none; } }
+@keyframes flashFail { 0% { background: rgba(255,90,90,.45); box-shadow: inset 0 0 24px rgba(255,90,90,.4); } 100% { background: transparent; box-shadow: none; } }
+.gesture-row.flash-ok   { animation: flashOk 1.6s ease-out; }
+.gesture-row.flash-fail { animation: flashFail 1.6s ease-out; }
 .room .roomtxt{display:inline-block}
 .dev{font-family:var(--mono);font-size:11px;color:var(--ink-3);cursor:pointer;text-align:center;letter-spacing:.5px;transition:color .2s}
 .steprow{font-family:var(--mono);font-size:10px;color:var(--ink-3);text-align:center;letter-spacing:1px;text-transform:uppercase;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:10px}
@@ -389,6 +397,23 @@ function poll(){
     if(sld && typeof d.step==='number' && !stepDragging){
       sld.value=d.step;
       sv.textContent=d.step;
+    }
+    // Gesture-fired flash. Dedup by (gid + event-timestamp) so we only fire
+    // the animation once per actual gesture, not on every status poll.
+    if(d.firedGid && d.firedSince>=0){
+      let eventStamp=Math.round((d.up*1000) - d.firedSince);
+      let key=d.firedGid+':'+eventStamp;
+      if(key!==window._lastFlashKey){
+        window._lastFlashKey=key;
+        let slot=document.querySelector('.gesture-slot[data-gid="'+d.firedGid+'"]');
+        let row=slot ? slot.closest('.gesture-row') : null;
+        if(row){
+          row.classList.remove('flash-ok','flash-fail');
+          // Force a reflow so the animation re-runs even when same class re-applied.
+          void row.offsetWidth;
+          row.classList.add(d.firedOk?'flash-ok':'flash-fail');
+        }
+      }
     }
     let fw=document.getElementById('fwline');
     if(fw){
@@ -765,6 +790,18 @@ static void serveApiStatus() {
   json += ",\"updStatus\":\""; json += jsonEscape(updaterState.status); json += "\"";
   json += ",\"updLatest\":\""; json += jsonEscape(updaterState.latestVer); json += "\"";
   json += ",\"updError\":\""; json += jsonEscape(updaterState.lastError); json += "\"";
+  // Last-fired gesture for UI flash — only report if it happened in the last
+  // 2s, otherwise null so the UI doesn't re-flash stale events on every poll.
+  {
+    unsigned long since = millis() - lastFiredMs;
+    if (lastFiredMs > 0 && since < 2000) {
+      json += ",\"firedGid\":\""; json += jsonEscape(lastFiredGid); json += "\"";
+      json += ",\"firedOk\":"; json += lastFiredOk ? "true" : "false";
+      json += ",\"firedSince\":"; json += since;
+    } else {
+      json += ",\"firedGid\":\"\",\"firedOk\":false,\"firedSince\":-1";
+    }
+  }
   json += "}";
   web.send(200, "application/json", json);
 }

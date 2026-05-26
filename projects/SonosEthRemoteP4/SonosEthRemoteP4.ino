@@ -106,8 +106,45 @@ static void handleSerialLine(const String& line) {
     } else {
       Serial.printf("ERR invalid slug '%s' (lowercase a-z 0-9 -, ≤16 chars)\n", slug.c_str());
     }
+  } else if (line.startsWith("SETUP:")) {
+    // SETUP:<prefix>:<slug> — atomically sets both, reboots once.
+    // Use when commissioning a board for a new client (e.g. SETUP:phil:liv).
+    String rest = line.substring(6);
+    int colon = rest.indexOf(':');
+    if (colon < 0) {
+      Serial.println("ERR SETUP format: SETUP:<prefix>:<slug>");
+      return;
+    }
+    String pfx  = rest.substring(0, colon);
+    String slug = rest.substring(colon + 1);
+    pfx.trim();  pfx.toLowerCase();
+    slug.trim(); slug.toLowerCase();
+    bool pOk = (pfx.length()  == 0 || isValidRoomSlug(pfx));
+    bool sOk = (slug.length() == 0 || isValidRoomSlug(slug));
+    if (pOk && sOk) {
+      saveHostPrefix(pfx);
+      saveRoomSlug(slug);
+      Serial.printf("OK prefix='%s' slug='%s' — restarting\n", pfx.c_str(), slug.c_str());
+      delay(250);
+      ESP.restart();
+    } else {
+      Serial.printf("ERR invalid prefix or slug (a-z 0-9 -, ≤16 chars each)\n");
+    }
+  } else if (line.startsWith("PREFIX:")) {
+    String pfx = line.substring(7);
+    pfx.trim();
+    pfx.toLowerCase();
+    if (pfx.length() == 0 || isValidRoomSlug(pfx)) {
+      saveHostPrefix(pfx);
+      Serial.printf("OK prefix='%s' — restarting\n", pfx.c_str());
+      delay(250);
+      ESP.restart();
+    } else {
+      Serial.printf("ERR invalid prefix '%s'\n", pfx.c_str());
+    }
   } else if (line == "WHOAMI") {
-    Serial.printf("hostname=%s room='%s'\n", hostname, loadRoomSlug().c_str());
+    Serial.printf("hostname=%s prefix='%s' slug='%s'\n",
+      hostname, loadHostPrefix().c_str(), loadRoomSlug().c_str());
   }
 }
 static void pollSerialCommands() {
@@ -215,9 +252,20 @@ void loop() {
     }
     if (spk.connected() && (now - lastRefresh) >= T_STATE_POLL) {
       lastRefresh = now;
+      static int refreshFails = 0;
       if (!refreshState()) {
-        spk.online = false;
-        logEvent("speaker unreachable");
+        refreshFails++;
+        dbg("refresh failure %d/3", refreshFails);
+        // Require 3 consecutive failures (~15s) before declaring the speaker
+        // offline — single transient SOAP timeouts during rapid-rotation
+        // bursts shouldn't kick us into rediscovery.
+        if (refreshFails >= 3) {
+          spk.online = false;
+          logEvent("speaker unreachable (3 failed refreshes)");
+          refreshFails = 0;
+        }
+      } else {
+        refreshFails = 0;
       }
     }
     if (!spk.connected() && (now - lastDiscover) >= T_REDISCOVER) {

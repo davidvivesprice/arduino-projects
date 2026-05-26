@@ -19,6 +19,7 @@ struct Room {
 };
 
 constexpr Room ROOMS[] = {
+  // Martha's Vineyard install (TPS)
   { "mstbed",  "Master Bedroom"          },
   { "mstbth",  "Master Bathroom"         },
   { "grkit",   "Great Room / Kitchen"    },
@@ -26,12 +27,19 @@ constexpr Room ROOMS[] = {
   { "fam",     "Family Room (Basement)"  },
   { "bed2",    "Bedroom 2"               },
   { "bed3",    "Bedroom 3"               },
+  // Phil's home install
+  { "liv",     "Living Room"             },
+  { "kit",     "Kitchen"                 },
 };
 constexpr size_t ROOMS_COUNT = sizeof(ROOMS) / sizeof(ROOMS[0]);
 
-constexpr char ROOM_PREFIX[]    = "tpsvc";
-constexpr char ROOM_NVS_NS[]    = "room";
-constexpr char ROOM_NVS_KEY[]   = "slug";
+// Default hostname prefix when no per-board override is stored in NVS.
+// For Phil's install we override to "phil" so his hostnames are phil-liv.local
+// rather than tpsvc-liv.local — clean separation between clients.
+constexpr char ROOM_PREFIX[]      = "tpsvc";
+constexpr char ROOM_NVS_NS[]      = "room";
+constexpr char ROOM_NVS_KEY[]     = "slug";
+constexpr char ROOM_NVS_PFX_KEY[] = "prefix";
 
 // Validate a slug: lowercase letters, digits, hyphens only. Length 1..16.
 inline bool isValidRoomSlug(const String& s) {
@@ -67,12 +75,33 @@ inline bool saveRoomSlug(const String& slug) {
   return true;
 }
 
+// Load/save the hostname prefix. Default = ROOM_PREFIX ("tpsvc"). Per-board
+// override lets us run different clients on the same firmware binary.
+inline String loadHostPrefix() {
+  Preferences p;
+  if (!p.begin(ROOM_NVS_NS, true)) return String(ROOM_PREFIX);
+  String s = p.getString(ROOM_NVS_PFX_KEY, ROOM_PREFIX);
+  p.end();
+  return s.length() ? s : String(ROOM_PREFIX);
+}
+inline bool saveHostPrefix(const String& prefix) {
+  // Empty prefix = reset to default. Otherwise must pass slug validation.
+  if (prefix.length() > 0 && !isValidRoomSlug(prefix)) return false;
+  Preferences p;
+  if (!p.begin(ROOM_NVS_NS, false)) return false;
+  if (prefix.length() == 0) p.remove(ROOM_NVS_PFX_KEY);
+  else                      p.putString(ROOM_NVS_PFX_KEY, prefix);
+  p.end();
+  return true;
+}
+
 // Compute the final hostname given current MAC + stored room.
 // `out` must be at least 24 bytes.
 inline void computeHostname(char* out, size_t outLen, const uint8_t mac[6]) {
   String slug = loadRoomSlug();
   if (slug.length() > 0) {
-    snprintf(out, outLen, "%s-%s", ROOM_PREFIX, slug.c_str());
+    String prefix = loadHostPrefix();
+    snprintf(out, outLen, "%s-%s", prefix.c_str(), slug.c_str());
   } else {
     snprintf(out, outLen, "sonos-p4-%02x%02x", mac[4], mac[5]);
   }

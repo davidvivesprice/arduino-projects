@@ -65,10 +65,13 @@ constexpr char FW_VERSION[] = "1.0.0";
 constexpr char UPDATE_MANIFEST_URL[] =
   "https://raw.githubusercontent.com/davidvivesprice/arduino-projects/main/projects/SonosEthRemoteP4/manifest.json";
 
-// Updater cadence — 6h between checks, with up to ±60min jitter so all 7
-// boards don't hammer the manifest URL at the same time.
-constexpr unsigned long T_UPDATE_CHECK    = 6UL * 60UL * 60UL * 1000UL;  // 6h
-constexpr unsigned long T_UPDATE_JITTER   = 60UL * 60UL * 1000UL;        // ±1h
+// Updater cadence — 5 min between checks, with ±30s jitter. The manifest
+// fetch is a ~300-byte HTTPS GET, so a 9-board fleet at this cadence is ~108
+// requests/hr against raw.githubusercontent.com — well below any rate limit.
+// Trade-off: push a release from anywhere and worst-case ~5-6 min until every
+// board has it, no VPN / no LAN access required.
+constexpr unsigned long T_UPDATE_CHECK    = 5UL * 60UL * 1000UL;   // 5 min
+constexpr unsigned long T_UPDATE_JITTER   = 30UL * 1000UL;         // ±30s
 
 inline void dbg(const char* fmt, ...) {
   if (!DEBUG_LOG) return;

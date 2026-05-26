@@ -77,6 +77,14 @@ static unsigned long lastVolCmd = 0;
 // installed boards look identical from the outside.
 volatile unsigned long lastActivityMs = 0;
 
+// Last fired gesture + whether its mapped action succeeded. The web UI uses
+// these to flash the corresponding gesture row green (success) or red (Sonos
+// rejected the SOAP call — e.g. Next on a radio source). Cleared by the UI
+// after rendering, but we also expire stale events server-side after 2s.
+String        lastFiredGid    = "";
+bool          lastFiredOk     = false;
+unsigned long lastFiredMs     = 0;
+
 // =============================================================================
 // Rotation — Seesaw firmware already debounces & decodes the quadrature, so
 // getEncoderDelta() returns net detent change since the last call. We just
@@ -142,16 +150,25 @@ static void fireGesture(uint8_t clicks, bool withHold, bool longHold) {
 
   if (!spk.connected()) {
     logEvent("gesture %s ignored (no speaker)", gid);
+    lastFiredGid = String(gid);
+    lastFiredOk = false;
+    lastFiredMs = millis();
     return;
   }
   GestureMap m = getMapping(gid);
   String aid = m.actionId.length() > 0 ? m.actionId : defaultActionFor(gid);
   if (aid.length() == 0) {
     logEvent("gesture %s -> (unmapped)", gid);
+    lastFiredGid = String(gid);
+    lastFiredOk = false;   // unmapped is "didn't do anything" — flash red
+    lastFiredMs = millis();
     return;
   }
   logEvent("gesture %s -> %s", gid, aid.c_str());
-  runAction(aid, m.param);
+  bool ok = runAction(aid, m.param);
+  lastFiredGid = String(gid);
+  lastFiredOk  = ok;
+  lastFiredMs  = millis();
   if (!aid.startsWith("enter_")) exitMode();
 }
 
