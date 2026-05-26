@@ -1,8 +1,8 @@
 {
-  "version": "1.0.3",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.3/SonosEthRemoteP4-v1.0.3.bin",
-  "sha256": "8424d586469daaf432418cef26bad6d23fa1cc0903ba68a60f6e352e476540df",
-  "size": 1043584,
-  "released": "2026-05-26T05:37:16Z",
-  "notes": "Pulse goes live: activity-triggered reports (≤25s after click/rotation), rotation bursts in pulse feed, prominent FW version in per-board web UI, CHANGELOG.md added."
+  "version": "1.0.4",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.4/SonosEthRemoteP4-v1.0.4.bin",
+  "sha256": "9d3dca5e63a5af05ef45a774c7a7e11592a79c3044f2c772e0779037e19bbe8e",
+  "size": 1043840,
+  "released": "2026-05-26T05:41:00Z",
+  "notes": "Hot-swap encoders + rich pulse labels + up-front fleet verdict."
 }
