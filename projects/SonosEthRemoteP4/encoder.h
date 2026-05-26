@@ -123,6 +123,22 @@ inline void fleetEventsClear() { fleetEvtCount = 0; }
 volatile unsigned long lastRotationMs = 0;
 uint32_t fleetRotEvents = 0;  // total detents (user-perceptible clicks) since boot
 
+// Rotation burst aggregation — single pulse-feed entry per "knob session"
+// (continuous rotation, ending after ~1.2s of no activity). Avoids flooding
+// the buffer with one entry per detent when someone spins fast.
+static int16_t       rotBurstDelta  = 0;
+static unsigned long rotBurstFirst  = 0;
+
+inline void fleetMaybeFlushRotBurst() {
+  if (rotBurstDelta == 0) return;
+  if (millis() - lastRotationMs < 1200) return;  // still mid-burst
+  char gid[8];
+  snprintf(gid, sizeof(gid), "rot%+d", (int)rotBurstDelta);
+  fleetLogGesture(gid, true);
+  rotBurstDelta = 0;
+  rotBurstFirst = 0;
+}
+
 // =============================================================================
 // Rotation — Seesaw firmware already debounces & decodes the quadrature, so
 // getEncoderDelta() returns net detent change since the last call. We just
@@ -147,8 +163,14 @@ static void processEncoder() {
     int detents = fractional / TRANSITIONS_PER_DETENT;
     fractional -= detents * TRANSITIONS_PER_DETENT;
     pending += detents;
-    if (detents != 0) fleetRotEvents += (detents > 0 ? detents : -detents);
+    if (detents != 0) {
+      fleetRotEvents += (detents > 0 ? detents : -detents);
+      if (rotBurstFirst == 0) rotBurstFirst = millis();
+      rotBurstDelta += detents;
+    }
   }
+  // Flush idle burst into pulse buffer.
+  fleetMaybeFlushRotBurst();
 
   if (!spk.connected()) return;
   if (pending == 0) return;

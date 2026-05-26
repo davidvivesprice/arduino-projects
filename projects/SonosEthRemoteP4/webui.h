@@ -244,7 +244,7 @@ details.section>summary:hover{background:#16161e}
 <div class='eyebrow'>Sonos · Ethernet · Edition</div>
 <div class='room' id='room'><span class='actdot' id='actdot' title='Lights up when this board sees a knob turn or click'></span><span class='roomtxt' id='roomtxt'>···</span><span class='roomhost' id='roomhost'></span></div>
 <div class='dev' id='dev' onclick='rename()' title='Click to rename'></div>
-<div id='fwline' style="font-family:var(--mono);font-size:9px;color:var(--ink-3);text-align:center;letter-spacing:1px;margin-top:4px"></div>
+<div id='fwline' style="font-family:var(--mono);font-size:11px;color:var(--ink);text-align:center;letter-spacing:1.5px;margin-top:8px;text-transform:uppercase"></div>
 <div class='steprow' title='How much the volume changes per encoder detent'>
   <span>Vol/detent</span>
   <input type='range' min='1' max='10' step='1' id='stepsld' oninput='onStepInput(this.value)' onchange='onStepCommit(this.value)'>

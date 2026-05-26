@@ -233,20 +233,34 @@ inline bool checkForUpdate(bool force = false) {
 }
 
 // ── Schedule periodic checks ───────────────────────────────────────────────
+// Two cadences interleave:
+//   • Manifest check + heartbeat fleet report   — every T_UPDATE_CHECK + jitter
+//   • Activity-triggered fleet report           — when events buffer non-empty,
+//     rate-limited to once per T_FLEET_ACTIVE so a long spin doesn't spam.
 inline void updaterTick(bool ethConnected, const char* hostname,
                          bool i2cOk, uint16_t ssPid) {
   if (!ethConnected) return;
-  // First check: 60s after boot (gives DHCP, mDNS, speaker discovery time).
-  // Subsequent checks: every T_UPDATE_CHECK + jitter.
-  static unsigned long nextCheck = 60UL * 1000UL;
-  if (millis() < nextCheck) return;
+
+  // First scheduled check 60s after boot (give DHCP/mDNS/SSDP time).
+  static unsigned long nextHeartbeat = 60UL * 1000UL;
+  static unsigned long lastActivityReport = 0;
+  constexpr unsigned long T_FLEET_ACTIVE = 25UL * 1000UL;  // min gap between active reports
+
+  // Activity-triggered path — flush pending events to the hub fast so the
+  // dashboard pulse stays responsive to real user input.
+  bool hasEvents = (fleetEvtCount > 0);
+  if (hasEvents && (millis() - lastActivityReport) > T_FLEET_ACTIVE) {
+    lastActivityReport = millis();
+    fleetReport(hostname, i2cOk, ssPid);
+    return;  // skip heartbeat this tick; we just reported
+  }
+
+  // Heartbeat path — runs even on idle boards so the dashboard knows they're
+  // alive. Bundles up any not-yet-reported events as a side-effect.
+  if (millis() < nextHeartbeat) return;
   long jitter = (long)random(-(long)T_UPDATE_JITTER, (long)T_UPDATE_JITTER);
-  nextCheck = millis() + T_UPDATE_CHECK + jitter;
-
-  // Phone home to the fleet hub first (it's cheap and we don't want the
-  // possibly-restarting OTA flow to skip it).
+  nextHeartbeat = millis() + T_UPDATE_CHECK + jitter;
+  lastActivityReport = millis();
   fleetReport(hostname, i2cOk, ssPid);
-
-  // Then check for new firmware. May reboot mid-call on success.
-  checkForUpdate(false);
+  checkForUpdate(false);  // may reboot on success
 }
