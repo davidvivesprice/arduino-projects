@@ -47,6 +47,11 @@ header .sub{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-trans
 .legend .ok{background:var(--ok)}.legend .warn{background:var(--warn)}.legend .bad{background:var(--bad)}
 .footer{text-align:center;margin-top:36px;font-size:10px;color:var(--ink3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
 .empty{text-align:center;padding:60px 0;color:var(--ink3);font-family:var(--mono);text-transform:uppercase;letter-spacing:2px;font-size:11px}
+.verdict{margin-bottom:20px;padding:14px 18px;border-radius:8px;font-family:var(--mono);font-size:12px;letter-spacing:1px;text-transform:uppercase;text-align:center;border:1px solid var(--ink4);background:#101012}
+.verdict.allgreen{border-color:rgba(93,209,123,.35);color:var(--ok)}
+.verdict.warning{border-color:rgba(224,194,92,.4);color:var(--warn)}
+.verdict.danger{border-color:rgba(255,90,90,.4);color:var(--bad)}
+.verdict .sub{display:block;color:var(--ink3);text-transform:none;letter-spacing:0;font-size:11px;margin-top:4px}
 .pulse{margin-bottom:28px;background:#101012;border:1px solid var(--ink4);border-radius:8px;padding:14px 16px}
 .pulse h2{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
 .pulse h2 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
@@ -63,6 +68,7 @@ header .sub{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-trans
 .pulse .feed-empty{color:var(--ink3);font-style:italic;padding:14px 0;text-align:center}
 </style></head><body>
 <header><h1>Sonos Fleet</h1><div class="sub">TPS × Vives · live</div></header>
+<div id="verdict" class="verdict"></div>
 <div class="pulse">
   <h2><span>Pulse · recent activity</span><span class="live-dot"></span></h2>
   <div id="pulseFeed" class="feed"><div class="feed-empty">no activity yet</div></div>
@@ -90,7 +96,18 @@ async function load(){
     document.getElementById('grid').innerHTML='<div class="empty">hub unreachable</div>';
   }
 }
-const GLABEL={'1c':'click','2c':'double-click','3c':'triple-click','4c':'quad-click','5c':'quint-click','hold':'hold','lh':'long hold','1c+h':'click+hold','2c+h':'2c+hold','3c+h':'3c+hold','4c+h':'4c+hold'};
+const GLABEL={'1c':'tap','2c':'double-tap','3c':'triple-tap','4c':'quad-tap','5c':'5× tap','hold':'hold','lh':'long hold','1c+h':'tap + hold','2c+h':'double + hold','3c+h':'triple + hold','4c+h':'quad + hold'};
+function labelFor(gid){
+  // Rotation bursts: "rot+5", "rot-12" → "vol up · medium (+5)" etc.
+  const m = String(gid).match(/^rot([+-])(\\d+)$/);
+  if(m){
+    const dir=m[1]==='+'?'up':'down';
+    const n=parseInt(m[2],10);
+    const speed = n>=10?'fast spin':n>=4?'medium':'light';
+    return \`vol \${dir} · \${speed} (\${m[1]}\${n})\`;
+  }
+  return GLABEL[gid]||gid;
+}
 function renderPulse(p){
   const feed=document.getElementById('pulseFeed');
   const events=p.events||[];
@@ -100,11 +117,12 @@ function renderPulse(p){
   for(const e of events){
     const since=Math.max(0,Math.floor(now-e.t));
     const when=since<60?since+'s':since<3600?Math.floor(since/60)+'m':Math.floor(since/3600)+'h';
-    const label=GLABEL[e.gid]||e.gid;
+    const label=labelFor(e.gid);
     const okCls=e.ok?'':' fail';
+    const tail=e.ok?'':' · didn\\'t fire';
     h+=\`<div class="row"><div class="when">\${when}</div>
       <div class="who">\${esc(e.id.replace(/^(tpsvc|phil)-/,''))}</div>
-      <div class="what\${okCls}">\${esc(label)}\${e.ok?'':' (rejected)'}</div></div>\`;
+      <div class="what\${okCls}">\${esc(label)}\${tail}</div></div>\`;
   }
   feed.innerHTML=h;
 }
@@ -117,9 +135,34 @@ function ago(sec){
 function render(j){
   const now=Date.now()/1000;
   const boards=j.boards||[];
+  const v=document.getElementById('verdict');
   if(boards.length===0){
     document.getElementById('grid').innerHTML='<div class="empty">no boards have reported yet</div>';
+    if(v){v.className='verdict warning';v.innerHTML='Waiting for first report…<span class="sub">Boards report on boot + every 5 min.</span>';}
     return;
+  }
+  // Up-front health verdict: how many ok, how many sick, what's wrong?
+  let okCount=0,sick=[];
+  for(const b of boards){
+    const s=stateOf(b,now);
+    if(s==='ok'){okCount++;continue;}
+    const why=[];
+    if((now-b.ts)>DEAD) why.push('offline');
+    if(!b.i2c) why.push('no encoder');
+    if(!b.spkOnline) why.push('no speaker');
+    if(s==='warn'&&why.length===0) why.push('stale report');
+    sick.push({id:b.id,label:b.label||b.room||b.id,why:why.join(', ')});
+  }
+  if(v){
+    if(sick.length===0){
+      v.className='verdict allgreen';
+      v.innerHTML=\`All \${boards.length} boards healthy<span class="sub">Encoders detected, Sonos online, reporting normally.</span>\`;
+    } else {
+      const cls=sick.some(s=>s.why.includes('offline'))?'danger':'warning';
+      v.className='verdict '+cls;
+      const list=sick.map(s=>\`\${esc(s.label)}: \${esc(s.why)}\`).join(' · ');
+      v.innerHTML=\`\${okCount} of \${boards.length} healthy<span class="sub">\${list}</span>\`;
+    }
   }
   // Sort: bad first, then warn, then ok by client+room
   boards.sort((a,b)=>{

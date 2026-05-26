@@ -6,7 +6,25 @@ Release tagged `sonos-eth-p4-v<version>` with the binary attached.
 
 ---
 
-## [1.0.3] — pending
+## [1.0.4] — pending
+
+### Added
+- **Encoder hot-swap.** Firmware probes the I2C bus every 2 s. If a Seesaw
+  appears (encoder freshly plugged in), it's auto-initialized and rotation
+  works immediately — no reboot needed. If it disappears (3 consecutive ACK
+  failures), the board flags `i2c: false` and the hub dashboard goes red for
+  that room.
+- **Up-front fleet health verdict** at the top of the dashboard. Big green
+  banner "All N boards healthy" or specific issues called out ("Bedroom 3:
+  no encoder · Master Bath: no speaker").
+- **Rich pulse labels.** Gestures show as "tap", "double-tap", "long hold",
+  "tap + hold", etc. Rotations classify by magnitude — "vol up · light (+2)",
+  "vol up · medium (+5)", "vol up · fast spin (+12)". Failed actions append
+  "didn't fire" in red.
+
+---
+
+## [1.0.3] — 2026-05-26
 
 ### Added
 - Rotation bursts surface in the fleet hub pulse feed (one entry per "knob

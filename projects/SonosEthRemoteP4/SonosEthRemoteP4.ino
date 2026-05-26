@@ -89,6 +89,42 @@ static bool initSeesaw() {
   return false;
 }
 
+// Hot-swap detection. Probes the I2C bus every ~2s and either re-initializes
+// the Seesaw when an encoder is freshly plugged in, or marks it unhealthy
+// after several consecutive ACK failures (encoder unplugged / cable yanked).
+// Cheap — one bus transaction every 2 seconds, no impact on rotation reads.
+static void encoderHotswapTick() {
+  static unsigned long lastProbeMs   = 0;
+  static int           probeFailRun  = 0;
+  if (millis() - lastProbeMs < 2000) return;
+  lastProbeMs = millis();
+
+  Wire.beginTransmission(SEESAW_ADDR);
+  bool present = (Wire.endTransmission() == 0);
+
+  if (present) {
+    probeFailRun = 0;
+    if (!ssReady) {
+      // Quick re-init (no full scan log — we already know which pins worked).
+      if (ss.begin(SEESAW_ADDR) && sspixel.begin(SEESAW_ADDR)) {
+        ss.pinMode(SS_SWITCH, INPUT_PULLUP);
+        (void)ss.getEncoderDelta();
+        sspixel.setBrightness(0);
+        sspixel.show();
+        ssReady = true;
+        logEvent("encoder hot-plugged");
+      }
+    }
+  } else if (ssReady) {
+    // Require 3 misses in a row before flagging — single transient I2C
+    // hiccups don't count.
+    if (++probeFailRun >= 3) {
+      ssReady = false;
+      logEvent("encoder lost (i2c ACK failed 3x)");
+    }
+  }
+}
+
 // Accept "ROOM:<slug>\n" over USB serial → write NVS, restart.
 // Called both during the boot serial window and inside loop() so that
 // reassignment works whether or not Ethernet is up.
@@ -231,6 +267,7 @@ void setup() {
 void loop() {
   // Serial command poll runs unconditionally so ROOM:<slug> always works.
   pollSerialCommands();
+  encoderHotswapTick();  // detect plug/unplug, auto-init on appear
   if (ethConnected) {
     ArduinoOTA.handle();
     web.handleClient();
