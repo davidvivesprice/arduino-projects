@@ -1,8 +1,8 @@
 {
-  "version": "1.0.6",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.6/SonosEthRemoteP4-v1.0.6.bin",
-  "sha256": "c24aec7a51a7fda329f939d3480ad47b4a269cac438cff0182de025ece17e41c",
-  "size": 1057616,
-  "released": "2026-06-19T00:33:15Z",
-  "notes": "Install-time wizard, simpleMode default (play/pause + volume only), idiot-proof landing UI, live activity readouts."
+  "version": "1.0.7",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.7/SonosEthRemoteP4-v1.0.7.bin",
+  "sha256": "bc8cb0da0fa946b38b3ce4c1579fc86c1cea43d4a81e9463b8dc996380897df3",
+  "size": 1058048,
+  "released": "2026-06-19T00:39:08Z",
+  "notes": "Per-board UI: fix the 'update available: <older version>' false positive caused by raw.githubusercontent.com CDN cache lag. Strict-newer semver compare."
 }
