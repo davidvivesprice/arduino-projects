@@ -1,8 +1,8 @@
 {
-  "version": "1.0.11",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.11/SonosEthRemoteP4-v1.0.11.bin",
-  "sha256": "8b288362207b5da1875b79381c0e7f9af7a128de47bc4e7a5cd36e25c82a2260",
-  "size": 1066864,
-  "released": "2026-06-19T01:32:44Z",
-  "notes": "Hot-swap responsiveness + cleaner motion icon. 1-cycle probe (was 3-cycle) so disconnects stop processing immediately, no ghost events on yank. Motion icon shows only concrete states (gesture, direction, ✗ no-encoder) — drops confusing 'knob touched/waiting' alternation. Full-bus scan if address jumpers got disturbed during a saddle swap."
+  "version": "1.0.12",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.12/SonosEthRemoteP4-v1.0.12.bin",
+  "sha256": "3a2a4536ae5f4c4ab9c9228bf8c855c88449834379f96d8dacc7550c64a4f7db",
+  "size": 1068240,
+  "released": "2026-06-19T01:53:39Z",
+  "notes": "Real hot-swap fix. Boot with no encoder → encoder plugged later now actually detects (v1.0.11 was stuck probing one pin orientation). Bidirectional re-init every 3s when ssReady=false. Manual 'Rescan' button on landing card when no encoder detected."
 }
