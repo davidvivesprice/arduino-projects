@@ -1,8 +1,8 @@
 {
-  "version": "1.0.7",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.7/SonosEthRemoteP4-v1.0.7.bin",
-  "sha256": "bc8cb0da0fa946b38b3ce4c1579fc86c1cea43d4a81e9463b8dc996380897df3",
-  "size": 1058048,
-  "released": "2026-06-19T00:39:08Z",
-  "notes": "Per-board UI: fix the 'update available: <older version>' false positive caused by raw.githubusercontent.com CDN cache lag. Strict-newer semver compare."
+  "version": "1.0.8",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.8/SonosEthRemoteP4-v1.0.8.bin",
+  "sha256": "5e1a5e6edb324d83b81fd0970595c32fb34e7c1038ee4aa7fc210fbe56497ab1",
+  "size": 1062224,
+  "released": "2026-06-19T00:49:38Z",
+  "notes": "Encoder visibility focus. Wizard parked. Always-on landing shows encoder health pill + big live motion icon (↻ ↺ ● ◐). Faster fleet reports (5s) so the dashboard's per-card motion icons feel near-realtime."
 }
