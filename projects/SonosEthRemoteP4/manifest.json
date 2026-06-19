@@ -1,8 +1,8 @@
 {
-  "version": "1.0.9",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.9/SonosEthRemoteP4-v1.0.9.bin",
-  "sha256": "e0f7029cfa7140af4a083789f7368ee5e8430785af1d65c3b49d27ab36a7c073",
-  "size": 1063472,
-  "released": "2026-06-19T00:55:04Z",
-  "notes": "Encoder calibration: TRANSITIONS_PER_DETENT runtime+NVS (1..32). /api/calibrate?tpd=N to dial in any encoder family (Bourns variants etc) without rebuilding firmware. rawTx counter exposed for empirical tuning."
+  "version": "1.0.10",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.10/SonosEthRemoteP4-v1.0.10.bin",
+  "sha256": "7cb65abc64cf4b99b335675b4956440dd6556e51092564f503847e45d411169a",
+  "size": 1066496,
+  "released": "2026-06-19T00:57:38Z",
+  "notes": "Inline speaker picker on landing card. Click current speaker name to change — auto-discovery if list empty. No more 'go to Advanced to scan'. Fixed wizard's /api/speakers parsing for the resurrection."
 }
