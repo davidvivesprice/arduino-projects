@@ -1,8 +1,8 @@
 {
-  "version": "1.0.13",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.13/SonosEthRemoteP4-v1.0.13.bin",
-  "sha256": "a946d31e689df63ccbcbfd5109658cd1e96b0823d2b6aa495978d6bf60f3060b",
-  "size": 1068688,
-  "released": "2026-06-19T13:16:46Z",
-  "notes": "Audit-driven hardening pass. See AUDIT_GUIDE.md for full list."
+  "version": "1.0.14",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.14/SonosEthRemoteP4-v1.0.14.bin",
+  "sha256": "358605246a7897b0f93441c95091f91d858a7392b32be2ae11d662c8ef5cf2d5",
+  "size": 1068672,
+  "released": "2026-06-19T14:07:09Z",
+  "notes": "Migrate fleet reporting to self-hosted hub at fleet.vivessato.com — eliminates Cloudflare KV write/read caps."
 }
