@@ -1,8 +1,8 @@
 {
-  "version": "1.0.5",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.5/SonosEthRemoteP4-v1.0.5.bin",
-  "sha256": "c2f71a97fcf4b0fbf87323bab4b8a0a79e7e78d458e8870a759d444a25302f46",
-  "size": 1044192,
-  "released": "2026-06-19T00:05:47Z",
-  "notes": "Hard reliability: 1h network-stall watchdog + exponential backoff on fleet POST failures. Worker secret restored after recreate."
+  "version": "1.0.6",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.6/SonosEthRemoteP4-v1.0.6.bin",
+  "sha256": "c24aec7a51a7fda329f939d3480ad47b4a269cac438cff0182de025ece17e41c",
+  "size": 1057616,
+  "released": "2026-06-19T00:33:15Z",
+  "notes": "Install-time wizard, simpleMode default (play/pause + volume only), idiot-proof landing UI, live activity readouts."
 }
