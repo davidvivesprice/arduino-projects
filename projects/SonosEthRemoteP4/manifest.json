@@ -1,8 +1,8 @@
 {
-  "version": "1.0.12",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.12/SonosEthRemoteP4-v1.0.12.bin",
-  "sha256": "3a2a4536ae5f4c4ab9c9228bf8c855c88449834379f96d8dacc7550c64a4f7db",
-  "size": 1068240,
-  "released": "2026-06-19T01:53:39Z",
-  "notes": "Real hot-swap fix. Boot with no encoder → encoder plugged later now actually detects (v1.0.11 was stuck probing one pin orientation). Bidirectional re-init every 3s when ssReady=false. Manual 'Rescan' button on landing card when no encoder detected."
+  "version": "1.0.13",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.13/SonosEthRemoteP4-v1.0.13.bin",
+  "sha256": "a946d31e689df63ccbcbfd5109658cd1e96b0823d2b6aa495978d6bf60f3060b",
+  "size": 1068688,
+  "released": "2026-06-19T13:16:46Z",
+  "notes": "Audit-driven hardening pass. See AUDIT_GUIDE.md for full list."
 }
