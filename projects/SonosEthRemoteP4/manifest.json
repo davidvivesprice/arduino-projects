@@ -1,8 +1,8 @@
 {
-  "version": "1.0.10",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.10/SonosEthRemoteP4-v1.0.10.bin",
-  "sha256": "7cb65abc64cf4b99b335675b4956440dd6556e51092564f503847e45d411169a",
-  "size": 1066496,
-  "released": "2026-06-19T00:57:38Z",
-  "notes": "Inline speaker picker on landing card. Click current speaker name to change — auto-discovery if list empty. No more 'go to Advanced to scan'. Fixed wizard's /api/speakers parsing for the resurrection."
+  "version": "1.0.11",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.11/SonosEthRemoteP4-v1.0.11.bin",
+  "sha256": "8b288362207b5da1875b79381c0e7f9af7a128de47bc4e7a5cd36e25c82a2260",
+  "size": 1066864,
+  "released": "2026-06-19T01:32:44Z",
+  "notes": "Hot-swap responsiveness + cleaner motion icon. 1-cycle probe (was 3-cycle) so disconnects stop processing immediately, no ghost events on yank. Motion icon shows only concrete states (gesture, direction, ✗ no-encoder) — drops confusing 'knob touched/waiting' alternation. Full-bus scan if address jumpers got disturbed during a saddle swap."
 }
