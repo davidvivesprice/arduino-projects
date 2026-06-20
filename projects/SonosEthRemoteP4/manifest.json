@@ -1,8 +1,8 @@
 {
-  "version": "1.0.22",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.22/SonosEthRemoteP4-v1.0.22.bin",
-  "sha256": "5947a7308464ee39a80acc25197389089f1afb8b2acc0bdf65bb6356369375c4",
-  "size": 1104192,
-  "released": "2026-06-20T22:05:38Z",
-  "notes": "Knob-only install wizard. Collapse 7 steps into 5: welcome (click to start, also confirms the button works), twist right (also confirms the encoder), pick the Sonos (rotation moves the highlight, click selects), give it a turn, all set (auto-redirects, no Done button). Total screen taps to finish the wizard: zero. Total knob clicks: two."
+  "version": "1.0.23",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.23/SonosEthRemoteP4-v1.0.23.bin",
+  "sha256": "16f80ada7431789252b3b83a6f69f21848ac5f235cd3135ac6c727c64fe654a8",
+  "size": 1109152,
+  "released": "2026-06-20T22:13:11Z",
+  "notes": "Persistent gesture feed on the dashboard — always visible between the landing card and the Advanced expander. Shows the last 5 gestures the firmware recognized (raw gid like 'h+1c' on top of the friendly label) so you can tell at a glance whether 'tap + hold + tap' got heard as h+1c or got swallowed as 2c without needing the serial monitor. Chips age out after 60s; tap 'clear' to reset. Hold calibration (T_HOLD=500ms, T_LONG_HOLD=1500ms) is unchanged — it's the bench-tuned value."
 }
