@@ -1,8 +1,8 @@
 {
-  "version": "1.0.15",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.15/SonosEthRemoteP4-v1.0.15.bin",
-  "sha256": "eb70def2aa51a205d77581ce9c6f10b03c0446b7434de0d549ab362e37638da7",
-  "size": 1069056,
-  "released": "2026-06-20T01:09:53Z",
-  "notes": "Hub-impacting fixes from the multi-lens audit: speaker.h adjustVolume no longer caches the -1 SOAP-fail sentinel into spk.volume; JSON encoding now escapes control chars and \" in spk.name across fleet POST and /api/speakers; /api/mappings returns all 11 gestures instead of 5; hub-side: events table grew a UNIQUE index so retries actually dedupe, and /report rejects malformed JSON with 400 instead of 500."
+  "version": "1.0.16",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.16/SonosEthRemoteP4-v1.0.16.bin",
+  "sha256": "fe012045fcb99d506ae316497710a9606b31945684a01f2775a3ee735e7bf559",
+  "size": 1069248,
+  "released": "2026-06-20T01:44:34Z",
+  "notes": "Second audit batch: encoder accumulator resets across hot-swap/mode-exit/calibrate, unmapped-gesture exits BASS/TREBLE, updater contentLen sign-cast fix + watchdog secret-gate (contributor builds no longer reboot every 75 min), HOSTNAME_BUFLEN replaces hand-rolled char[24] sites, fleet error counters wired (soap+ota actually increment), dashboard reads the right errors field."
 }
