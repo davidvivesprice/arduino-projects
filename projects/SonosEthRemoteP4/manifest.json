@@ -1,8 +1,8 @@
 {
-  "version": "1.0.27",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.27/SonosEthRemoteP4-v1.0.27.bin",
-  "sha256": "c46deb96cce49e866d5a11d920d7b6c7934d885631cae0aced61b07213813436",
-  "size": 1105184,
-  "released": "2026-06-20T22:54:28Z",
-  "notes": "Fleet default flipped: Power-user mode on out of the box. New boards ship with simpleMode=false so 2c=next, 3c=prev, hold=mute, and the rest of the vocabulary fire without finding and flipping a toggle. Existing boards keep their persisted NVS value."
+  "version": "1.0.28",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.28/SonosEthRemoteP4-v1.0.28.bin",
+  "sha256": "50865ce0c65a0e4479a565eefd0d743bf2079655a12991a63258cc919c0ed4f6",
+  "size": 1104080,
+  "released": "2026-06-20T23:36:18Z",
+  "notes": "Remove simpleMode / Power-user gating. The toggle was redundant — unmapped gestures already don't fire, so a global kill switch added a layer of state without buying anything you couldn't do per-gesture in the Gestures picker. Defaults trimmed to the three nobody would be surprised by: 1c=play/pause, 2c=next, 3c=prev. The four that used to be defaulted (hold=mute, lh=enter volume, 1c+h=enter bass, 2c+h=enter treble) now appear under a 'Suggested' header at the top of the action picker so they're one tap away if the user wants them. Removed: simpleMode bool, NVS slot, loadSimpleMode/saveSimpleMode, /api/simplemode endpoint, the Power-user toggle in the Gestures header, the togglePowerUser JS, the simpleMode field in /api/status."
 }
