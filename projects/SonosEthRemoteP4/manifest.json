@@ -1,8 +1,8 @@
 {
-  "version": "1.0.16",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.16/SonosEthRemoteP4-v1.0.16.bin",
-  "sha256": "fe012045fcb99d506ae316497710a9606b31945684a01f2775a3ee735e7bf559",
-  "size": 1069248,
-  "released": "2026-06-20T01:44:34Z",
-  "notes": "Second audit batch: encoder accumulator resets across hot-swap/mode-exit/calibrate, unmapped-gesture exits BASS/TREBLE, updater contentLen sign-cast fix + watchdog secret-gate (contributor builds no longer reboot every 75 min), HOSTNAME_BUFLEN replaces hand-rolled char[24] sites, fleet error counters wired (soap+ota actually increment), dashboard reads the right errors field."
+  "version": "1.0.17",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.17/SonosEthRemoteP4-v1.0.17.bin",
+  "sha256": "f986035bf2da3f008ce41c49690d6a2bd8d26539f3c39ce6ab04314596033105",
+  "size": 1070432,
+  "released": "2026-06-20T02:36:29Z",
+  "notes": "Discoverable 'Run setup' link on the per-board landing card — POSTs to /api/wizard/reset and navigates to /?wizard=1 to summon the parked install wizard for inspection. Parked default unchanged for fresh boards."
 }
