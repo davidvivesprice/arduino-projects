@@ -1,8 +1,8 @@
 {
-  "version": "1.0.23",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.23/SonosEthRemoteP4-v1.0.23.bin",
-  "sha256": "16f80ada7431789252b3b83a6f69f21848ac5f235cd3135ac6c727c64fe654a8",
-  "size": 1109152,
-  "released": "2026-06-20T22:13:11Z",
-  "notes": "Persistent gesture feed on the dashboard — always visible between the landing card and the Advanced expander. Shows the last 5 gestures the firmware recognized (raw gid like 'h+1c' on top of the friendly label) so you can tell at a glance whether 'tap + hold + tap' got heard as h+1c or got swallowed as 2c without needing the serial monitor. Chips age out after 60s; tap 'clear' to reset. Hold calibration (T_HOLD=500ms, T_LONG_HOLD=1500ms) is unchanged — it's the bench-tuned value."
+  "version": "1.0.24",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.24/SonosEthRemoteP4-v1.0.24.bin",
+  "sha256": "66080e56b0fc606326d09e7cdec47295eb77526d7b33b24ccaa9aab157041f8e",
+  "size": 1105456,
+  "released": "2026-06-20T22:21:00Z",
+  "notes": "Motion-icon overhaul: morse-code visualization for every gesture. Clicks are dots, holds are bars, compounds concatenate in the order performed. So tap=●, double-tap=●●, hold=▬, click+hold=●▬ (amber), hold+click=▬● (amber), 3-tap+hold=●●●▬, hold+2-tap=▬●●, etc. Fixes: (1) click+hold and hold+click families used to show NOTHING because the icon table only covered 1c..5c, hold, lh; (2) replaces the half-filled circle ◐ for hold with a clean dash glyph; (3) rotation-burst icon was silently broken because /\\\\d+/ in a C++ raw string matches literal '\\\\d+' not digits — switched to /[0-9]+/. Adds length-based scaling so 5c+h (6 chars) still fits the column."
 }
