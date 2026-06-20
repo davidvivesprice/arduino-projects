@@ -1,8 +1,8 @@
 {
-  "version": "1.0.18",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.18/SonosEthRemoteP4-v1.0.18.bin",
-  "sha256": "52b47823bbd840808f56447e5032d015894af0e15bfbb8a7542dff659e0c0891",
-  "size": 1070480,
-  "released": "2026-06-20T02:41:44Z",
-  "notes": "Fixes the three smells flagged in DOC_AUDIT.md: dashboard.html b.ip XSS (regex-validated before href interpolation), encoder.h ButtonFSM reseed from live ss.digitalRead so hot-swap-during-press doesn't fire a phantom press, and nas-hub /report now returns 400 on non-finite/non-numeric nowMs + surfaces rejected_events count for invalid event entries (instead of silently absorbing adversarial input as 200)."
+  "version": "1.0.19",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.19/SonosEthRemoteP4-v1.0.19.bin",
+  "sha256": "d406f6454339dbb8312700b9a8b07e2fe29a7bfb3368d195fea65df7bdb35e50",
+  "size": 1074752,
+  "released": "2026-06-20T17:12:33Z",
+  "notes": "Three small UX wins: power-user gestures toggle in the masthead (binds to /api/simplemode), 'identify' link on the landing card that briefly bumps the paired Sonos volume +5 so an installer can hear which board they're looking at, and a yellow update-available strip above the health banner whenever a newer manifest version is published."
 }
