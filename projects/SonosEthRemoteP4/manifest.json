@@ -1,8 +1,8 @@
 {
-  "version": "1.0.21",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.21/SonosEthRemoteP4-v1.0.21.bin",
-  "sha256": "89cfc77cd6fed49077640cd9c3463228035d0f088d4e636b219b398a7db895de",
-  "size": 1108496,
-  "released": "2026-06-20T18:33:17Z",
-  "notes": "Fold the polished install wizard into webui.h. Replaces the parked v1.0.6 wizard markup with the 7-step takeover from the ui-preview mock-up: animated pulse, rotating arrow, ripple-on-press, inline speaker picker, live volume gauge that fills as Sonos vol moves, animated check-draw. State machine driven by /api/status — no simulate-event chip on real hardware. Full-screen takeover when setupComplete=false or /?wizard=1 — masthead, banner, landing, and Advanced all hide."
+  "version": "1.0.22",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.22/SonosEthRemoteP4-v1.0.22.bin",
+  "sha256": "5947a7308464ee39a80acc25197389089f1afb8b2acc0bdf65bb6356369375c4",
+  "size": 1104192,
+  "released": "2026-06-20T22:05:38Z",
+  "notes": "Knob-only install wizard. Collapse 7 steps into 5: welcome (click to start, also confirms the button works), twist right (also confirms the encoder), pick the Sonos (rotation moves the highlight, click selects), give it a turn, all set (auto-redirects, no Done button). Total screen taps to finish the wizard: zero. Total knob clicks: two."
 }
