@@ -1,8 +1,8 @@
 {
-  "version": "1.0.20",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.20/SonosEthRemoteP4-v1.0.20.bin",
-  "sha256": "60827a9675c8c07d09fed2772011809cbb4d56afb26af62a6a7fc02be12ae8b4",
-  "size": 1095664,
-  "released": "2026-06-20T18:21:57Z",
-  "notes": "Big structural restructure of the per-board UI (mockup work made real). Masthead pared down to identity (no more bare-hostname duplicate, no more loud white FW CHECK NOW). Healthy banner hides itself when there's nothing wrong. Landing card consolidates encoder cluster + sensitivity + speaker pairing + three big buttons (Change speaker, Identify, Run setup). Advanced section gets a knob-activity practice readout + mobile-first tap-to-edit gesture editor. Gesture engine extended: new h+1c through h+5c (hold then click) family + 5c+h. Action picker dims actions already mapped to other gestures; shows inline descriptions for the modes (knob → bass / treble / volume) and for Loudness boost so installers know what they do. Wizard auto-launches on fresh boards (setupComplete=false). Visual polish pass for the new structure is queued for design Claude — this release is the structural skeleton on real hardware."
+  "version": "1.0.21",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.21/SonosEthRemoteP4-v1.0.21.bin",
+  "sha256": "89cfc77cd6fed49077640cd9c3463228035d0f088d4e636b219b398a7db895de",
+  "size": 1108496,
+  "released": "2026-06-20T18:33:17Z",
+  "notes": "Fold the polished install wizard into webui.h. Replaces the parked v1.0.6 wizard markup with the 7-step takeover from the ui-preview mock-up: animated pulse, rotating arrow, ripple-on-press, inline speaker picker, live volume gauge that fills as Sonos vol moves, animated check-draw. State machine driven by /api/status — no simulate-event chip on real hardware. Full-screen takeover when setupComplete=false or /?wizard=1 — masthead, banner, landing, and Advanced all hide."
 }
