@@ -1,8 +1,8 @@
 {
-  "version": "1.0.17",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.17/SonosEthRemoteP4-v1.0.17.bin",
-  "sha256": "f986035bf2da3f008ce41c49690d6a2bd8d26539f3c39ce6ab04314596033105",
-  "size": 1070432,
-  "released": "2026-06-20T02:36:29Z",
-  "notes": "Discoverable 'Run setup' link on the per-board landing card — POSTs to /api/wizard/reset and navigates to /?wizard=1 to summon the parked install wizard for inspection. Parked default unchanged for fresh boards."
+  "version": "1.0.18",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.18/SonosEthRemoteP4-v1.0.18.bin",
+  "sha256": "52b47823bbd840808f56447e5032d015894af0e15bfbb8a7542dff659e0c0891",
+  "size": 1070480,
+  "released": "2026-06-20T02:41:44Z",
+  "notes": "Fixes the three smells flagged in DOC_AUDIT.md: dashboard.html b.ip XSS (regex-validated before href interpolation), encoder.h ButtonFSM reseed from live ss.digitalRead so hot-swap-during-press doesn't fire a phantom press, and nas-hub /report now returns 400 on non-finite/non-numeric nowMs + surfaces rejected_events count for invalid event entries (instead of silently absorbing adversarial input as 200)."
 }
