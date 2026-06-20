@@ -4,5 +4,5 @@
   "sha256": "eb70def2aa51a205d77581ce9c6f10b03c0446b7434de0d549ab362e37638da7",
   "size": 1069056,
   "released": "2026-06-20T01:09:53Z",
-  "notes": "Hub-impacting fixes from the multi-lens audit: speaker.h adjustVolume no longer caches the -1 SOAP-fail sentinel into spk.volume; JSON encoding now escapes control chars and \\" in spk.name across fleet POST and /api/speakers; /api/mappings returns all 11 gestures instead of 5; hub-side: events table grew a UNIQUE index so retries actually dedupe, and /report rejects malformed JSON with 400 instead of 500."
+  "notes": "Hub-impacting fixes from the multi-lens audit: speaker.h adjustVolume no longer caches the -1 SOAP-fail sentinel into spk.volume; JSON encoding now escapes control chars and \" in spk.name across fleet POST and /api/speakers; /api/mappings returns all 11 gestures instead of 5; hub-side: events table grew a UNIQUE index so retries actually dedupe, and /report rejects malformed JSON with 400 instead of 500."
 }
