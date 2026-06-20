@@ -1,8 +1,8 @@
 {
-  "version": "1.0.25",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.25/SonosEthRemoteP4-v1.0.25.bin",
-  "sha256": "b04ba4e55bc9802ded2cbff265efac158982347490cf4b12bcf65482852e8ecb",
-  "size": 1105776,
-  "released": "2026-06-20T22:31:12Z",
-  "notes": "Wizard step 2 (speaker picker): finer scrolling. Adds a signed rotationFine counter to encoder.h that ticks once per raw Seesaw transition (vs rotationNet, which only ticks once per tpd raw transitions = once every ~4 physical clicks on this encoder family). Picker now uses rotationFine, so each tick of the knob advances the highlight at the hardware's finest reportable resolution — half the felt-click count as before. Two-speaker list now navigates in ~2 physical clicks per item instead of ~4. Exposed via /api/status as rotationFine; also zeroed by /api/rotnet/reset."
+  "version": "1.0.26",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.26/SonosEthRemoteP4-v1.0.26.bin",
+  "sha256": "251bd5823eec9a1a54dbd51233231134838e235686418c9737bc2224a7e6cf1c",
+  "size": 1105168,
+  "released": "2026-06-20T22:33:53Z",
+  "notes": "Wizard copy trim. Strips the explanatory ledes from all 5 steps and neutralizes the helper text. 'No tapping needed — everything's done with the knob' (ambiguous — readers parse 'taps of the knob') is gone entirely. Headings are now nouns: Setup / Turn clockwise / Select speaker / Turn to adjust volume / Done. Dynamic helpers shed checkmarks and emoji: 'direction set', 'direction flipped — turn again', 'volume changed', 'returning to dashboard'."
 }
