@@ -1,8 +1,8 @@
 {
-  "version": "1.0.19",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.19/SonosEthRemoteP4-v1.0.19.bin",
-  "sha256": "d406f6454339dbb8312700b9a8b07e2fe29a7bfb3368d195fea65df7bdb35e50",
-  "size": 1074752,
-  "released": "2026-06-20T17:12:33Z",
-  "notes": "Three small UX wins: power-user gestures toggle in the masthead (binds to /api/simplemode), 'identify' link on the landing card that briefly bumps the paired Sonos volume +5 so an installer can hear which board they're looking at, and a yellow update-available strip above the health banner whenever a newer manifest version is published."
+  "version": "1.0.20",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.20/SonosEthRemoteP4-v1.0.20.bin",
+  "sha256": "60827a9675c8c07d09fed2772011809cbb4d56afb26af62a6a7fc02be12ae8b4",
+  "size": 1095664,
+  "released": "2026-06-20T18:21:57Z",
+  "notes": "Big structural restructure of the per-board UI (mockup work made real). Masthead pared down to identity (no more bare-hostname duplicate, no more loud white FW CHECK NOW). Healthy banner hides itself when there's nothing wrong. Landing card consolidates encoder cluster + sensitivity + speaker pairing + three big buttons (Change speaker, Identify, Run setup). Advanced section gets a knob-activity practice readout + mobile-first tap-to-edit gesture editor. Gesture engine extended: new h+1c through h+5c (hold then click) family + 5c+h. Action picker dims actions already mapped to other gestures; shows inline descriptions for the modes (knob → bass / treble / volume) and for Loudness boost so installers know what they do. Wizard auto-launches on fresh boards (setupComplete=false). Visual polish pass for the new structure is queued for design Claude — this release is the structural skeleton on real hardware."
 }
