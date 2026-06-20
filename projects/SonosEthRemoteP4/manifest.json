@@ -1,8 +1,8 @@
 {
-  "version": "1.0.14",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.14/SonosEthRemoteP4-v1.0.14.bin",
-  "sha256": "358605246a7897b0f93441c95091f91d858a7392b32be2ae11d662c8ef5cf2d5",
-  "size": 1068672,
-  "released": "2026-06-19T14:07:09Z",
-  "notes": "Migrate fleet reporting to self-hosted hub at fleet.vivessato.com — eliminates Cloudflare KV write/read caps."
+  "version": "1.0.15",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.15/SonosEthRemoteP4-v1.0.15.bin",
+  "sha256": "eb70def2aa51a205d77581ce9c6f10b03c0446b7434de0d549ab362e37638da7",
+  "size": 1069056,
+  "released": "2026-06-20T01:09:53Z",
+  "notes": "Hub-impacting fixes from the multi-lens audit: speaker.h adjustVolume no longer caches the -1 SOAP-fail sentinel into spk.volume; JSON encoding now escapes control chars and \\" in spk.name across fleet POST and /api/speakers; /api/mappings returns all 11 gestures instead of 5; hub-side: events table grew a UNIQUE index so retries actually dedupe, and /report rejects malformed JSON with 400 instead of 500."
 }
