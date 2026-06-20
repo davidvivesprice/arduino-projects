@@ -1,8 +1,8 @@
 {
-  "version": "1.0.24",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.24/SonosEthRemoteP4-v1.0.24.bin",
-  "sha256": "66080e56b0fc606326d09e7cdec47295eb77526d7b33b24ccaa9aab157041f8e",
-  "size": 1105456,
-  "released": "2026-06-20T22:21:00Z",
-  "notes": "Motion-icon overhaul: morse-code visualization for every gesture. Clicks are dots, holds are bars, compounds concatenate in the order performed. So tap=●, double-tap=●●, hold=▬, click+hold=●▬ (amber), hold+click=▬● (amber), 3-tap+hold=●●●▬, hold+2-tap=▬●●, etc. Fixes: (1) click+hold and hold+click families used to show NOTHING because the icon table only covered 1c..5c, hold, lh; (2) replaces the half-filled circle ◐ for hold with a clean dash glyph; (3) rotation-burst icon was silently broken because /\\\\d+/ in a C++ raw string matches literal '\\\\d+' not digits — switched to /[0-9]+/. Adds length-based scaling so 5c+h (6 chars) still fits the column."
+  "version": "1.0.25",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.25/SonosEthRemoteP4-v1.0.25.bin",
+  "sha256": "b04ba4e55bc9802ded2cbff265efac158982347490cf4b12bcf65482852e8ecb",
+  "size": 1105776,
+  "released": "2026-06-20T22:31:12Z",
+  "notes": "Wizard step 2 (speaker picker): finer scrolling. Adds a signed rotationFine counter to encoder.h that ticks once per raw Seesaw transition (vs rotationNet, which only ticks once per tpd raw transitions = once every ~4 physical clicks on this encoder family). Picker now uses rotationFine, so each tick of the knob advances the highlight at the hardware's finest reportable resolution — half the felt-click count as before. Two-speaker list now navigates in ~2 physical clicks per item instead of ~4. Exposed via /api/status as rotationFine; also zeroed by /api/rotnet/reset."
 }
