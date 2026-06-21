@@ -1,8 +1,8 @@
 {
-  "version": "1.0.28",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.28/SonosEthRemoteP4-v1.0.28.bin",
-  "sha256": "50865ce0c65a0e4479a565eefd0d743bf2079655a12991a63258cc919c0ed4f6",
-  "size": 1104080,
-  "released": "2026-06-20T23:36:18Z",
-  "notes": "Remove simpleMode / Power-user gating. The toggle was redundant — unmapped gestures already don't fire, so a global kill switch added a layer of state without buying anything you couldn't do per-gesture in the Gestures picker. Defaults trimmed to the three nobody would be surprised by: 1c=play/pause, 2c=next, 3c=prev. The four that used to be defaulted (hold=mute, lh=enter volume, 1c+h=enter bass, 2c+h=enter treble) now appear under a 'Suggested' header at the top of the action picker so they're one tap away if the user wants them. Removed: simpleMode bool, NVS slot, loadSimpleMode/saveSimpleMode, /api/simplemode endpoint, the Power-user toggle in the Gestures header, the togglePowerUser JS, the simpleMode field in /api/status."
+  "version": "1.0.29",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.29/SonosEthRemoteP4-v1.0.29.bin",
+  "sha256": "916ff6649f57fdbb3805701b60de891be772c53c0df82eb829c30cd7289c73ed",
+  "size": 1104208,
+  "released": "2026-06-21T00:02:57Z",
+  "notes": "Landing card reshuffle + scroll-volume bug. Speaker pair (this knob controls X) moves to the top — the most important fact on the page is the first thing you see. Volume gauge + transport buttons (prev/play/next/mute) + now-playing card promoted out of Advanced and into the landing card, so day-to-day controls are visible without expanding anything. Advanced now holds setup/config only: speaker discovery, sound shape (bass/treble/loudness), gestures editor, log. Page-scroll-over-gauge no longer flies volume to 100 — the wheel handler is removed. Click-and-drag on the gauge still works (Logic-style vertical drag). Removed redundant spkn / Playing-Paused-Muted badge text — the play and mute button icons already convey state."
 }
