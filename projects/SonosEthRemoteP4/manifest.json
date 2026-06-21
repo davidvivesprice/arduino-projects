@@ -1,8 +1,8 @@
 {
-  "version": "1.0.30",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.30/SonosEthRemoteP4-v1.0.30.bin",
-  "sha256": "9b0dc0e21630eb6c0c5a30c43b3acc328d8c99f99e70776d18d594aac11520f5",
+  "version": "1.0.31",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.31/SonosEthRemoteP4-v1.0.31.bin",
+  "sha256": "2298ab21ab15928bd4240a7d70821626046e2bf62073c2d6d78862dd986c9684",
   "size": 1087520,
-  "released": "2026-06-21T19:48:05Z",
-  "notes": "Design polish landed — dashboard + wizard ported from Claude Design's pass. Light + dark themes. Polished masthead identity card. Smooth volume gauge color climb via new gaugeStroke() interpolating gauge-low → accent-2 → accent-3 across 0-80-100. Framed live panel with breathing dot and motion icon glow tinted per gesture kind. 5-step wizard fully styled — pulser with knob SVG + concentric ripples, dial with sweep arrow, speaker list with clip fix + asymmetric padding, gauge matching the dashboard, done check with draw-on. PROGMEM 82-83%. Updater: first manifest check pulled in from 60s to 10s post-boot, with a 30s fast-retry cap (4x) so a board on a new VLAN can pick up new firmware in under ~2 minutes after PoE link-up even if the first check hits a transient."
+  "released": "2026-06-21T20:03:25Z",
+  "notes": "Demo-readiness pass — robustness for board-on-new-VLAN scenarios. T_REDISCOVER 5min → 30s: when Sonos becomes unreachable (cached IP stale on new VLAN, transient outage, Sonos reboot), the board re-runs SSDP and re-matches by name within 30s instead of sitting unreachable for 5 min. ui-preview/serve.py: /api/rotnet/reset now zeros rotationFine too — matches firmware. docs/DEMO_READINESS.md + docs/OFF_POE_PLAN.md written. Captured hardware reality: Unit PoE-P4 module has no WiFi, no BLE, no C6 coprocessor — SoftAP / ESP-NOW fallback isn't implementable on this board; venue must provide Ethernet."
 }
