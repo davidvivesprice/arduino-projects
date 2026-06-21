@@ -1,8 +1,8 @@
 {
-  "version": "1.0.31",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.31/SonosEthRemoteP4-v1.0.31.bin",
-  "sha256": "2298ab21ab15928bd4240a7d70821626046e2bf62073c2d6d78862dd986c9684",
-  "size": 1087520,
-  "released": "2026-06-21T20:03:25Z",
-  "notes": "Demo-readiness pass — robustness for board-on-new-VLAN scenarios. T_REDISCOVER 5min → 30s: when Sonos becomes unreachable (cached IP stale on new VLAN, transient outage, Sonos reboot), the board re-runs SSDP and re-matches by name within 30s instead of sitting unreachable for 5 min. ui-preview/serve.py: /api/rotnet/reset now zeros rotationFine too — matches firmware. docs/DEMO_READINESS.md + docs/OFF_POE_PLAN.md written. Captured hardware reality: Unit PoE-P4 module has no WiFi, no BLE, no C6 coprocessor — SoftAP / ESP-NOW fallback isn't implementable on this board; venue must provide Ethernet."
+  "version": "1.0.32",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.32/SonosEthRemoteP4-v1.0.32.bin",
+  "sha256": "03f0c113685652b7c3ff964877700904e1110c7ab6cdfd08dd2773cbc43c0961",
+  "size": 1088096,
+  "released": "2026-06-21T23:39:42Z",
+  "notes": "Bug squash: Sonos names with emoji + duplicate-speaker entries.\n\n(1) XML numeric character references now decoded in roomName + track metadata. Sonos firmware emits emoji as &#127925; (decimal) or &#x1F3B5; (hex) in zone names on some configurations — previously the dashboard showed the literal entity text instead of the emoji. unescape() now also returns proper UTF-8 byte sequences for any codepoint up to U+10FFFF, so 4-byte emoji round-trip correctly. The same decoder is applied to track titles/artists too (DIDL-Lite metadata path), so 'now playing' should also stop showing literal entity text for any track with special chars.\n\n(2) Discovery now dedupes by zone name. A single physical Sonos can answer SSDP from multiple network interfaces (its proprietary Sonos-net mesh and the regular LAN), producing two distinct IPs for the same zone. Without dedupe the picker shows two indistinguishable entries — and selecting the wrong one can leave the board talking to the secondary IP that may not respond to SOAP on every network. First IP that gave us a usable roomName wins; subsequent matches by name (case-insensitive) are skipped."
 }
