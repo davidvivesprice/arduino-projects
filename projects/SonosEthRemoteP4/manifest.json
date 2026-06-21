@@ -1,8 +1,8 @@
 {
-  "version": "1.0.29",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.29/SonosEthRemoteP4-v1.0.29.bin",
-  "sha256": "916ff6649f57fdbb3805701b60de891be772c53c0df82eb829c30cd7289c73ed",
-  "size": 1104208,
-  "released": "2026-06-21T00:02:57Z",
-  "notes": "Landing card reshuffle + scroll-volume bug. Speaker pair (this knob controls X) moves to the top — the most important fact on the page is the first thing you see. Volume gauge + transport buttons (prev/play/next/mute) + now-playing card promoted out of Advanced and into the landing card, so day-to-day controls are visible without expanding anything. Advanced now holds setup/config only: speaker discovery, sound shape (bass/treble/loudness), gestures editor, log. Page-scroll-over-gauge no longer flies volume to 100 — the wheel handler is removed. Click-and-drag on the gauge still works (Logic-style vertical drag). Removed redundant spkn / Playing-Paused-Muted badge text — the play and mute button icons already convey state."
+  "version": "1.0.30",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.30/SonosEthRemoteP4-v1.0.30.bin",
+  "sha256": "9b0dc0e21630eb6c0c5a30c43b3acc328d8c99f99e70776d18d594aac11520f5",
+  "size": 1087520,
+  "released": "2026-06-21T19:48:05Z",
+  "notes": "Design polish landed — dashboard + wizard ported from Claude Design's pass. Light + dark themes. Polished masthead identity card. Smooth volume gauge color climb via new gaugeStroke() interpolating gauge-low → accent-2 → accent-3 across 0-80-100. Framed live panel with breathing dot and motion icon glow tinted per gesture kind. 5-step wizard fully styled — pulser with knob SVG + concentric ripples, dial with sweep arrow, speaker list with clip fix + asymmetric padding, gauge matching the dashboard, done check with draw-on. PROGMEM 82-83%. Updater: first manifest check pulled in from 60s to 10s post-boot, with a 30s fast-retry cap (4x) so a board on a new VLAN can pick up new firmware in under ~2 minutes after PoE link-up even if the first check hits a transient."
 }
