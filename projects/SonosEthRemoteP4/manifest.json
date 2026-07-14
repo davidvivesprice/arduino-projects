@@ -1,8 +1,8 @@
 {
-  "version": "1.0.38",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.38/SonosEthRemoteP4-v1.0.38.bin",
-  "sha256": "2de5bd9857381d55eb1bf1e5db6a850602f9c664bb945bd92d9f694043056cc0",
-  "size": 1090976,
-  "released": "2026-07-14T18:04:48Z",
-  "notes": "Rename bed3 → office: ROOMS[] table updated, dropdown label 'Office', hostname suffix tpsvc-office. rooms.json + room.h stay in lockstep (release.sh preflight guards). No firmware logic changes — pure registry rename. All 7 boards continue to work on their existing paired speakers."
+  "version": "1.0.39",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.39/SonosEthRemoteP4-v1.0.39.bin",
+  "sha256": "c2c6c4a74454fc6147d1ddec8c4b7881bc77f856d022d0fd78032f74a25ff7be",
+  "size": 1092112,
+  "released": "2026-07-14T20:59:33Z",
+  "notes": "Fix hometheater-satellite bug: discovery.canonicalizeFromTopology() rewrites any speaker IP that SSDP picked up as a Satellite to the primary's Location IP by walking ZoneGroupTopology's <ZoneGroupMember> tags. parseCoordinatorIP() no longer short-circuits on paired-UUID==coord-UUID (that check was returning the satellite IP as the coord). Also switched the coord's ZoneGroupMember end-scan from '/>' to '>' so a hometheater main's non-self-closing tag doesn't consume its own Satellite children. Grkit hit this because its 'Dining Room' Sonos is a soundbar+satellite setup; every AVTransport call was HTTP 500. Unblocks wizard step 3 volume-changed detection."
 }
