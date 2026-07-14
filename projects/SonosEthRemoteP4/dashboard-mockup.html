@@ -223,6 +223,7 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
 @keyframes firePop{0%{transform:scale(.78)}55%{transform:scale(1.12)}100%{transform:scale(1.04)}}
 .motionlabel{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:2px;text-transform:uppercase;margin-top:11px;min-height:13px;transition:color .35s}
 .motionlabel.live{color:var(--ink-2)}
+.motionlabel.fail{color:var(--bad)}
 
 /* Volume gauge */
 .gauge-wrap{display:flex;justify-content:center;align-items:center;padding:10px 0 2px;position:relative}
@@ -807,14 +808,26 @@ function updateMotionIcon(d){
   ic.classList.remove('bad');
   if(window._lastRotNet===undefined)window._lastRotNet=d.rotationNet||0;
   const rotDelta=(d.rotationNet||0)-window._lastRotNet;window._lastRotNet=d.rotationNet||0;
-  let icon=null,label=null,kind=null;
-  if(d.firedGid&&d.firedSince>=0&&d.firedSince<1500){const r=gestureToMotion(d.firedGid);if(r){icon=r.icon;label=r.label;kind=r.kind;}}
+  let icon=null,label=null,kind=null,failed=false;
+  if(d.firedGid&&d.firedSince>=0&&d.firedSince<1500){
+    const r=gestureToMotion(d.firedGid);
+    if(r){
+      icon=r.icon;kind=r.kind;
+      // Show what actually happened, not just the raw gesture — the mapped
+      // action's label (server already resolves defaults via /api/mappings)
+      // when one fired, so this panel doubles as a live configuration check:
+      // gesture + result in one glance, no need to open the Gestures list.
+      const m=gestureMappings[d.firedGid],actLabel=(m&&m.action)?actionLabel(m.action):'';
+      if(actLabel){label=actLabel+(d.firedOk?'':' · failed');failed=!d.firedOk;}
+      else{label=r.label+' · unassigned';failed=true;}
+    }
+  }
   else if(rotDelta>0){icon='↻';label='turning right';kind='rot';}
   else if(rotDelta<0){icon='↺';label='turning left';kind='rot';}
   if(icon){
     const lenCls=icon.length>=6?'len6':icon.length===5?'len5':icon.length===4?'len4':icon.length===3?'len3':'';
     ic.className=('motionicon live '+(kind||'')+' '+lenCls).replace(/\s+/g,' ').trim();
-    void ic.offsetWidth;ic.textContent=icon;lb.textContent=label;lb.className='motionlabel live';
+    void ic.offsetWidth;ic.textContent=icon;lb.textContent=label;lb.className='motionlabel live'+(failed?' fail':'');
     if(area){
       const glow=kind==='click'?'rgba(203,98,88,.32)':kind==='hold'||kind==='rot'?'rgba(89,201,122,.28)':kind==='mix'?'rgba(216,165,68,.3)':'transparent';
       area.style.setProperty('--mglow',glow);area.style.setProperty('--mglowo',.55);

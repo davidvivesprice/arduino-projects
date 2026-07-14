@@ -1,8 +1,8 @@
 {
-  "version": "1.0.33",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.33/SonosEthRemoteP4-v1.0.33.bin",
-  "sha256": "e3afdc725a9a4d102bbf06b5e1321a585b57b27d4e1946f5046952dc237314a7",
-  "size": 1087152,
-  "released": "2026-06-22T00:21:20Z",
-  "notes": "Wizard: drop the Done celebration step. Step 3 (Turn to adjust volume) now redirects to the dashboard 1.2 s after volume confirms ≥5 — instead of a 2.2 s checkmark interstitial. Helper text turns green ('volume changed') as the only confirmation. Net: 4-step zero-tap wizard (Setup → Turn clockwise → Select speaker → Turn to adjust volume) → dashboard. Dropped the unused .checkwrap + checkPop/checkDraw CSS."
+  "version": "1.0.34",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.34/SonosEthRemoteP4-v1.0.34.bin",
+  "sha256": "a74dfa10d0a9d1ae45199bdf8ec7ebf63f53544bf97ae2841fcff9c791380cc4",
+  "size": 1089920,
+  "released": "2026-07-14T17:08:09Z",
+  "notes": "Group coordinator routing: Play/Pause/Next/Prev, play mode, crossfade, and sleep timer now target the zone's group coordinator instead of the selected speaker's own IP, so gestures work correctly on a grouped/following speaker. Also fixes speakerless zone players (e.g. Connect:Amp) being silently dropped from discovery. Live gesture panel now shows the actual triggered action (e.g. 'Next track') instead of just the raw gesture, with a red 'failed'/'unassigned' state when nothing happened."
 }
