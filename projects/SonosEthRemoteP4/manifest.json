@@ -1,8 +1,8 @@
 {
-  "version": "1.0.37",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.37/SonosEthRemoteP4-v1.0.37.bin",
-  "sha256": "e73834a58f067d3d52ae5e93d5a0c77cbe2cd7ab07d2b56c06ac4ac27def5979",
+  "version": "1.0.38",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.38/SonosEthRemoteP4-v1.0.38.bin",
+  "sha256": "2de5bd9857381d55eb1bf1e5db6a850602f9c664bb945bd92d9f694043056cc0",
   "size": 1090976,
-  "released": "2026-07-14T17:42:26Z",
-  "notes": "Group-coordinator routing, second attempt. Play/Pause/Next/Prev/GetPositionInfo now route to the group coordinator's IP instead of the paired speaker. Parser rewritten against real household ZoneGroupState XML captured from a live board (via v1.0.36's /api/zonestate diagnostic), verified across four scenarios (paired is coordinator, paired is a non-coord member of a multi-member group, paired is a different non-coord member, paired is not in any group) before ANY runtime change. Every parse failure branch returns pairedIP → guaranteed no regression from v1.0.35 behavior on any XML shape the parser doesn't recognize. Volume/bass/treble/mute unchanged — stay on paired speaker for per-room control."
+  "released": "2026-07-14T18:04:48Z",
+  "notes": "Rename bed3 → office: ROOMS[] table updated, dropdown label 'Office', hostname suffix tpsvc-office. rooms.json + room.h stay in lockstep (release.sh preflight guards). No firmware logic changes — pure registry rename. All 7 boards continue to work on their existing paired speakers."
 }
