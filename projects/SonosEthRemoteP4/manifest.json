@@ -1,8 +1,8 @@
 {
-  "version": "1.0.36",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.36/SonosEthRemoteP4-v1.0.36.bin",
-  "sha256": "62a3c06c6597b8303c522e805e5c75e60b6193570c7029f39dfe32c53d41aa49",
-  "size": 1088400,
-  "released": "2026-07-14T17:33:15Z",
-  "notes": "Read-only diagnostic release: adds /api/zonestate returning the raw ZoneGroupTopology::GetZoneGroupState XML verbatim from the paired speaker. Zero behavior change — Play/Pause/Next/Prev/rotation still route directly to the selected speaker's IP as in v1.0.35. This exists so the group-coordinator parser can be designed against real household XML instead of the memory-derived schema that broke v1.0.34."
+  "version": "1.0.37",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.37/SonosEthRemoteP4-v1.0.37.bin",
+  "sha256": "e73834a58f067d3d52ae5e93d5a0c77cbe2cd7ab07d2b56c06ac4ac27def5979",
+  "size": 1090976,
+  "released": "2026-07-14T17:42:26Z",
+  "notes": "Group-coordinator routing, second attempt. Play/Pause/Next/Prev/GetPositionInfo now route to the group coordinator's IP instead of the paired speaker. Parser rewritten against real household ZoneGroupState XML captured from a live board (via v1.0.36's /api/zonestate diagnostic), verified across four scenarios (paired is coordinator, paired is a non-coord member of a multi-member group, paired is a different non-coord member, paired is not in any group) before ANY runtime change. Every parse failure branch returns pairedIP → guaranteed no regression from v1.0.35 behavior on any XML shape the parser doesn't recognize. Volume/bass/treble/mute unchanged — stay on paired speaker for per-room control."
 }
