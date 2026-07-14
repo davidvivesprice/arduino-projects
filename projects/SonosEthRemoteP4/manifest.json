@@ -1,8 +1,8 @@
 {
-  "version": "1.0.35",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.35/SonosEthRemoteP4-v1.0.35.bin",
-  "sha256": "27614eaaa7873e59a3e1e9e729ee0e2d5db27215c4fccf3c5504656b62b9663a",
-  "size": 1087680,
-  "released": "2026-07-14T17:18:21Z",
-  "notes": "Rollback: revert v1.0.34's group coordinator routing. It was misrouting AVTransport commands (Play/Pause/Next/Prev) to a wrong IP and breaking transport control on live boards within minutes of rollout. Knob rotation/volume was unaffected. Playback commands go back to targeting the selected speaker directly, matching pre-1.0.34 behavior, until the coordinator lookup can be verified against real household topology. The Connect:Amp discovery fix and the live gesture-label UI update from v1.0.34 are kept — unrelated to the failure."
+  "version": "1.0.36",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.36/SonosEthRemoteP4-v1.0.36.bin",
+  "sha256": "62a3c06c6597b8303c522e805e5c75e60b6193570c7029f39dfe32c53d41aa49",
+  "size": 1088400,
+  "released": "2026-07-14T17:33:15Z",
+  "notes": "Read-only diagnostic release: adds /api/zonestate returning the raw ZoneGroupTopology::GetZoneGroupState XML verbatim from the paired speaker. Zero behavior change — Play/Pause/Next/Prev/rotation still route directly to the selected speaker's IP as in v1.0.35. This exists so the group-coordinator parser can be designed against real household XML instead of the memory-derived schema that broke v1.0.34."
 }
