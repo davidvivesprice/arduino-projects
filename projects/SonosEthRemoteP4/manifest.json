@@ -1,8 +1,8 @@
 {
-  "version": "1.0.34",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.34/SonosEthRemoteP4-v1.0.34.bin",
-  "sha256": "a74dfa10d0a9d1ae45199bdf8ec7ebf63f53544bf97ae2841fcff9c791380cc4",
-  "size": 1089920,
-  "released": "2026-07-14T17:08:09Z",
-  "notes": "Group coordinator routing: Play/Pause/Next/Prev, play mode, crossfade, and sleep timer now target the zone's group coordinator instead of the selected speaker's own IP, so gestures work correctly on a grouped/following speaker. Also fixes speakerless zone players (e.g. Connect:Amp) being silently dropped from discovery. Live gesture panel now shows the actual triggered action (e.g. 'Next track') instead of just the raw gesture, with a red 'failed'/'unassigned' state when nothing happened."
+  "version": "1.0.35",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.35/SonosEthRemoteP4-v1.0.35.bin",
+  "sha256": "27614eaaa7873e59a3e1e9e729ee0e2d5db27215c4fccf3c5504656b62b9663a",
+  "size": 1087680,
+  "released": "2026-07-14T17:18:21Z",
+  "notes": "Rollback: revert v1.0.34's group coordinator routing. It was misrouting AVTransport commands (Play/Pause/Next/Prev) to a wrong IP and breaking transport control on live boards within minutes of rollout. Knob rotation/volume was unaffected. Playback commands go back to targeting the selected speaker directly, matching pre-1.0.34 behavior, until the coordinator lookup can be verified against real household topology. The Connect:Amp discovery fix and the live gesture-label UI update from v1.0.34 are kept — unrelated to the failure."
 }
