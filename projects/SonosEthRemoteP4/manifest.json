@@ -1,8 +1,8 @@
 {
-  "version": "1.0.39",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.39/SonosEthRemoteP4-v1.0.39.bin",
-  "sha256": "c2c6c4a74454fc6147d1ddec8c4b7881bc77f856d022d0fd78032f74a25ff7be",
-  "size": 1092112,
-  "released": "2026-07-14T20:59:33Z",
-  "notes": "Fix hometheater-satellite bug: discovery.canonicalizeFromTopology() rewrites any speaker IP that SSDP picked up as a Satellite to the primary's Location IP by walking ZoneGroupTopology's <ZoneGroupMember> tags. parseCoordinatorIP() no longer short-circuits on paired-UUID==coord-UUID (that check was returning the satellite IP as the coord). Also switched the coord's ZoneGroupMember end-scan from '/>' to '>' so a hometheater main's non-self-closing tag doesn't consume its own Satellite children. Grkit hit this because its 'Dining Room' Sonos is a soundbar+satellite setup; every AVTransport call was HTTP 500. Unblocks wizard step 3 volume-changed detection."
+  "version": "1.0.40",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.40/SonosEthRemoteP4-v1.0.40.bin",
+  "sha256": "2bc53df6e4900668c7e91401870a28a861344d5175ca9a23ca6dcd24421e234e",
+  "size": 1090752,
+  "released": "2026-07-14T23:05:51Z",
+  "notes": "Wizard fixes and check_update gesture. (1) Firmware suppresses all mapped actions and volume/bass/treble rotation while setupComplete=false — clicks and turns during the install wizard no longer bleed through to the paired Sonos. (2) Wizard step 3 (volume test) now observes the encoder's rotationFine counter directly instead of Sonos vol-change, since actions are suppressed during setup. (3) One-page wizard: steps 1/2/3 all visible at once with cur/done/pending states; the press-to-begin ceremony is gone. (4) Speaker picker is names-only, tappable/clickable, and scrollIntoView follows the knob highlight so you don't have to touch-scroll while turning. (5) /api/wizard/reset now also clears the paired-speaker pairing and speakers[] so re-running setup on an already-paired board doesn't strand the wizard with a stale entry. (6) New 'check_update' action, mapped by default to long-hold (lh) — polls the manifest on demand and OTAs if newer; runs even when no Sonos is paired, so a bricked pairing can self-recover."
 }
