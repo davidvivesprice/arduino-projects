@@ -400,6 +400,16 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
 .wzbanner .knobmark svg{width:23px;height:23px;display:block}
 .wzbanner .roomname{font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.05;letter-spacing:.2px;color:var(--ink)}
 .wzbanner .host{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:2px;text-transform:lowercase}
+.wzbanner .fwrow{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:1.5px;text-transform:lowercase}
+.wzbanner .fwrow .sep{opacity:.35}
+.wzbanner .fwUpd{display:inline-flex;align-items:center;gap:5px;color:var(--ink-3);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 9px 3px 7px;cursor:pointer;font:inherit;letter-spacing:1.2px;text-transform:lowercase;transition:border-color .18s,color .18s,background .18s}
+.wzbanner .fwUpd:hover{border-color:var(--accent-line);color:var(--accent-2);background:var(--accent-wash)}
+.wzbanner .fwUpd.busy{color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-wash)}
+.wzbanner .fwUpd svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wzbanner .fwUpd.busy svg{animation:wzSpin 1s linear infinite}
+@keyframes wzSpin{to{transform:rotate(360deg)}}
+.wzbanner .fwUpd.avail{color:var(--accent-2);border-color:var(--accent-line);background:var(--accent-wash)}
+.wzbanner .fwUpd.avail::after{content:"·";color:var(--accent-2)}
 
 /* Progress pips — 3 dots for the middle steps (twist · pick · try) */
 .pips{display:flex;justify-content:center;align-items:center;gap:10px;padding:2px 0}
@@ -407,50 +417,62 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
 .pips .pip.done{background:var(--ok);box-shadow:0 0 8px var(--ok-line)}
 .pips .pip.cur{background:var(--accent-2);transform:scale(1.45);box-shadow:0 0 10px var(--accent-line)}
 
-/* Stage + steps — single-page compact layout. All three steps live on
-   one screen; the current step is highlighted, done steps go green,
-   pending steps sit muted. No more one-step-at-a-time animation. */
-.stage{position:relative;display:flex;flex-direction:column;gap:10px}
-.step{
-  position:relative;display:flex;flex-direction:row;align-items:center;gap:14px;
-  padding:12px 14px;
-  border:1px solid var(--line);border-radius:14px;background:var(--surface);
-  transition:border-color .25s var(--ease),background .25s,box-shadow .25s,opacity .25s;
-  opacity:.55;text-align:left;
-}
-.step.cur{opacity:1;border-color:var(--accent-line);background:linear-gradient(180deg,var(--surface-2),var(--surface));box-shadow:0 0 0 1px var(--accent-line),0 6px 22px -12px rgba(0,0,0,.55)}
-.step.done{opacity:.92;border-color:var(--ok-line);background:var(--ok-wash)}
-.step.gone{}  /* legacy no-op */
-.step .stepmeta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.step h2{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:-.1px;margin:0;line-height:1.15;color:var(--ink)}
-.step .helper{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:2px;text-transform:uppercase;min-height:13px;transition:color .2s}
+/* Stage + steps */
+.stage{position:relative;min-height:430px;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden}
+.stage::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--line-2) 30%,var(--line-2) 70%,transparent)}
+.step{display:none;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:30px 22px;text-align:center;flex:1}
+.step.cur{display:flex;animation:wzFadeIn .4s var(--ease)}
+@keyframes wzFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.step h2{font-family:var(--serif);font-size:27px;font-weight:400;letter-spacing:-.2px;margin:0 0 22px;line-height:1.08;color:var(--ink)}
+.step .helper{font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:2px;text-transform:uppercase;min-height:15px;margin-top:22px;transition:color .25s}
 .step .helper.ok{color:var(--ok)}
-.step.done .helper{color:var(--ok)}
 
-/* Compact per-step visual on the right (or block for step 2) */
-.step .miniviz{flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--ink);font-variant-numeric:tabular-nums}
-.step .mcount{font-size:22px;letter-spacing:-.5px;min-width:38px;text-align:right}
-.step .mcount .sep{color:var(--ink-3);font-size:15px;margin:0 2px}
-.step .mcount .goal{color:var(--ink-3);font-size:15px}
-.step .mdone{color:var(--ok);font-size:20px;display:flex;align-items:center;justify-content:center;width:38px}
-.step .mdone svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* Step 0 — pulser: a knob with concentric ripples */
+.pulser{width:128px;height:128px;display:flex;align-items:center;justify-content:center;position:relative;color:var(--accent-2)}
+.pulser::before,.pulser::after{content:"";position:absolute;width:100%;height:100%;border:1px solid var(--accent-line);border-radius:50%;animation:pulseRipple 2.4s var(--ease) infinite}
+.pulser::after{animation-delay:1.2s}
+.pulser .knobcore{width:66px;height:66px;border-radius:50%;border:1px solid var(--line-2);background:radial-gradient(circle at 50% 38%,var(--surface-3),var(--inset));display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px -8px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05);position:relative;z-index:1}
+.pulser .knobcore svg{width:30px;height:30px;fill:none;stroke:var(--accent-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@keyframes pulseRipple{0%{transform:scale(.52);opacity:.85}100%{transform:scale(1.55);opacity:0}}
 
-/* Step 2 (speaker) — laid out as a full-width block: title on top, list below */
-.step.step-spk{flex-direction:column;align-items:stretch;gap:8px;padding:12px 12px 12px}
-.step.step-spk .stepmeta{width:100%}
-.spklist{display:flex;flex-direction:column;gap:6px;width:100%;max-height:180px;overflow-y:auto;overflow-x:hidden;padding:2px 6px 2px 2px}
+/* Step 1 — dial with clockwise arrow + counter */
+.dial{position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center}
+.dial .ring-depth{position:absolute;width:170px;height:170px;border-radius:50%;border:1px solid var(--line);box-shadow:inset 0 1px 16px rgba(0,0,0,.35)}
+.dial svg{width:148px;height:148px}
+.dial .track{fill:none;stroke:var(--rail);stroke-width:3}
+.dial .sweep{fill:none;stroke:var(--accent-2);stroke-width:3;stroke-linecap:round;stroke-dasharray:150 360;transform-origin:74px 74px;animation:dialSpin 2.6s linear infinite}
+.dial .arrowhead{fill:var(--accent-2);transform-origin:74px 74px;animation:dialSpin 2.6s linear infinite}
+@keyframes dialSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.dial .counter{position:absolute;font-family:var(--serif);font-size:40px;letter-spacing:-1px;color:var(--ink);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:3px}
+.dial .counter .sep{color:var(--ink-3);font-size:26px}
+.dial .counter .goal{color:var(--ink-3);font-size:26px}
+
+/* Step 2 — speaker list */
+.spklist{display:flex;flex-direction:column;gap:8px;width:100%;max-height:268px;overflow-y:auto;overflow-x:hidden;padding:2px 9px 2px 2px}
 .spklist::-webkit-scrollbar{width:4px}
 .spklist::-webkit-scrollbar-thumb{background:var(--ink-4);border-radius:2px}
-.spkitem{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;text-align:left;background:var(--inset);cursor:pointer;transition:transform .18s var(--ease),border-color .18s var(--ease),background .18s}
-.spkitem:hover{border-color:var(--accent-line)}
-.spkitem.highlight{border-color:var(--accent-line);transform:translateX(4px);background:var(--accent-wash);box-shadow:0 0 0 1px var(--accent-line)}
+.spkitem{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:12px;padding:13px 15px;text-align:left;background:var(--inset);transition:transform .2s var(--ease),border-color .2s var(--ease),background .2s}
+.spkitem.highlight{border-color:var(--accent-line);transform:translateX(5px);background:var(--accent-wash);box-shadow:0 0 0 1px var(--accent-line)}
 .spkitem.picked{border-color:var(--ok-line);background:var(--ok-wash)}
-.spkitem .sname{font-family:var(--serif);font-size:14px;color:var(--ink);line-height:1.15;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spkitem .sname{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.1}
+.spkitem .sip{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);letter-spacing:1px;margin-top:3px}
 .spkitem .chk{color:var(--ok);opacity:0;transition:opacity .2s;flex-shrink:0;display:flex}
-.spkitem .chk svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.spkitem .chk svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .spkitem.picked .chk{opacity:1}
-.navhint{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--ink-3);text-transform:uppercase;text-align:center;margin-top:4px}
+.navhint{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--ink-3);text-transform:uppercase;text-align:center;margin-top:14px}
 .navhint span{color:var(--ink-2)}
+
+/* Step 3 — volume gauge (matches the dashboard gauge) */
+.wzgauge{position:relative;width:188px;height:188px;display:flex;align-items:center;justify-content:center}
+.wzgauge .ring-depth{position:absolute;width:214px;height:214px;border-radius:50%;border:1px solid var(--line);box-shadow:inset 0 1px 16px rgba(0,0,0,.35)}
+.wzgauge svg{width:100%;height:100%;overflow:visible}
+.wzgauge .track{fill:none;stroke:var(--rail);stroke-width:7;stroke-linecap:round}
+.wzgauge .fill{fill:none;stroke:var(--accent-2);stroke-width:7;stroke-linecap:round;stroke-dasharray:279.3;stroke-dashoffset:279.3;transition:stroke-dashoffset .22s var(--ease),stroke .25s;filter:drop-shadow(0 0 7px var(--accent-wash))}
+.wzgauge .gcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.wzgauge .gnum{font-family:var(--serif);font-size:60px;font-weight:300;line-height:1;letter-spacing:-2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.wzgauge .glbl{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--ink-3);text-transform:uppercase;margin-top:6px}
 
 </style></head><body>
 <script>try{if((localStorage.getItem('tps-theme')||'dark')==='light')document.body.classList.add('theme-light');}catch(e){}</script>
@@ -485,50 +507,76 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
       <div class="roomname" id="wzroom">Master Bedroom</div>
     </div>
     <div class="host" id="wzhost">tpsvc-mstbed.local</div>
+    <div class="fwrow">
+      <span id="wzFwVer">v-.-.-</span>
+      <span class="sep">·</span>
+      <button type="button" class="fwUpd" id="wzFwUpd" onclick="wzKickUpdate()" title="Check for firmware update">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.5 6.2"/><path d="M3 12a9 9 0 0 1 15.5-6.2"/><path d="M21 5v4h-4"/><path d="M3 19v-4h4"/></svg>
+        <span id="wzFwUpdLbl">check for updates</span>
+      </button>
+    </div>
   </div>
 
   <div class="pips" id="wzpips"></div>
 
   <div class="stage" id="wzstage">
 
-    <!-- Step 1 — Turn clockwise. rotationNet ≥ 2; auto-flips invert if ≤ -2.
-         The old "press to begin" step is gone — being in the wizard IS the
-         signal, no ceremony needed. -->
-    <section class="step cur" data-wzstep="1">
-      <div class="stepmeta">
-        <h2>Turn clockwise</h2>
-        <div class="helper" id="wzh1">waiting for rotation</div>
-      </div>
-      <div class="miniviz">
-        <div class="mcount"><span id="wzCwCnt">0</span><span class="sep">/</span><span class="goal">2</span></div>
-      </div>
+    <!-- Step 0 — Setup. Any click on the knob advances; that first click
+         doubles as proof the button works. -->
+    <section class="step cur" data-wzstep="0">
+      <h2>Setup</h2>
+      <div class="pulser"><div class="knobcore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v3.2"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></div></div>
+      <div class="helper" id="wzh0">press the knob to begin</div>
     </section>
 
-    <!-- Step 2 — Select speaker. Rotation moves highlight; click OR tap
-         an item to pick. Names only, list scrolls both by knob (via
-         scrollIntoView in wzSetHighlight) and by touch/mouse. -->
-    <section class="step step-spk" data-wzstep="2">
-      <div class="stepmeta">
-        <h2>Pick your speaker</h2>
-        <div class="helper" id="wzh2">turn or tap to choose</div>
+    <!-- Step 1 — Turn clockwise. d.rotationNet ≥ 2; auto-flips invert if ≤ -2. -->
+    <section class="step" data-wzstep="1">
+      <h2>Turn clockwise</h2>
+      <div class="dial">
+        <div class="ring-depth"></div>
+        <svg viewBox="0 0 148 148" aria-hidden="true">
+          <circle class="track" cx="74" cy="74" r="62"/>
+          <circle class="sweep" cx="74" cy="74" r="62"/>
+          <path class="arrowhead" d="M74 6 l-7 8 h5 v6 h4 v-6 h5 z"/>
+        </svg>
+        <div class="counter"><span id="wzCwCnt">0</span><span class="sep">/</span><span class="goal">2</span></div>
       </div>
+      <div class="helper" id="wzh1">waiting for rotation</div>
+    </section>
+
+    <!-- Step 2 — Select speaker. Rotation moves highlight; any click selects. -->
+    <section class="step" data-wzstep="2">
+      <h2>Select speaker</h2>
       <div class="spklist" id="wzSpkList">
-        <div class="spkitem" data-idx="0"><div class="sname">Discovering…</div><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div></div>
+        <div class="spkitem highlight" data-idx="0">
+          <div><div class="sname">Living Room</div><div class="sip">192.168.4.111</div></div>
+          <div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div>
+        </div>
+        <div class="spkitem" data-idx="1">
+          <div><div class="sname">Master Bedroom</div><div class="sip">192.168.4.112</div></div>
+          <div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div>
+        </div>
+        <div class="spkitem" data-idx="2">
+          <div><div class="sname">Kitchen</div><div class="sip">192.168.4.113</div></div>
+          <div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div>
+        </div>
       </div>
+      <div class="navhint">turn to <span>navigate</span> · press to <span>select</span></div>
+      <div class="helper" id="wzh2">waiting…</div>
     </section>
 
-    <!-- Step 3 — Turn to prove volume rotation works. Observes rotationFine
-         delta (encoder-only) instead of Sonos volume, because actions are
-         suppressed while setupComplete=false. Threshold: 5 detents in either
-         direction from the moment we entered step 3. -->
+    <!-- Step 3 — Turn to adjust volume. d.vol moves ≥ 5 from entry. -->
     <section class="step" data-wzstep="3">
-      <div class="stepmeta">
-        <h2>Turn to test volume</h2>
-        <div class="helper" id="wzh3">waiting for rotation</div>
+      <h2>Turn to adjust volume</h2>
+      <div class="wzgauge">
+        <div class="ring-depth"></div>
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <path class="track" d="M42.9 107A50 50 0 1 1 77.1 107"/>
+          <path class="fill" id="wzGaugeFill" d="M42.9 107A50 50 0 1 1 77.1 107"/>
+        </svg>
+        <div class="gcenter"><div class="gnum" id="wzVolNum">0</div><div class="glbl">Volume</div></div>
       </div>
-      <div class="miniviz">
-        <div class="mcount"><span id="wzVolNum">0</span><span class="sep">/</span><span class="goal">5</span></div>
-      </div>
+      <div class="helper" id="wzh3">waiting for rotation</div>
     </section>
 
   </div>
@@ -817,33 +865,39 @@ function updateActivityReadout(d){
   }
 }
 
-// ── Wizard engine ─────────────────────────────────────────────────────
-// Single-page layout: steps 1/2/3 all visible; wzStep tracks which one
-// is "current" (accepting input) and completed ones flip to .done.
-// Firmware suppresses all mapped actions while !setupComplete, so step 3
-// observes rotationFine delta directly instead of Sonos volume change.
-let wzStep=1,wzSpeakerLoaded=false,wzListSpeakers=[],wzHighlight=0,wzPickRotBase=0,wzEnterRotStep3=null;
+// ── Wizard engine (unchanged firmware contract) ──
+let wzStep=0,wzSpeakerLoaded=false,wzEnterVolStep3=-1,wzListSpeakers=[],wzHighlight=0,wzPickRotBase=0;
 function wzPipsHTML(cur){let h='';for(let i=1;i<=3;i++){let cls='pip';if(i<cur)cls+=' done';if(i===cur)cls+=' cur';h+='<div class="'+cls+'"></div>';}return h;}
-function wzRender(){document.querySelectorAll('#wzstage .step').forEach(s=>{let n=parseInt(s.dataset.wzstep,10);s.classList.toggle('cur',n===wzStep);s.classList.toggle('done',n<wzStep);s.classList.remove('gone');});let pips=document.getElementById('wzpips');if(pips)pips.innerHTML=wzPipsHTML(wzStep);}
-function wzAdvance(target){wzStep=target;wzRender();if(wzStep===1){fetch('/api/rotnet/reset').catch(()=>{});}if(wzStep===2&&!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}if(wzStep===3){wzEnterRotStep3=null;}}
-function wzSetHighlight(idx){if(!wzListSpeakers.length)return;if(idx<0)idx=0;if(idx>=wzListSpeakers.length)idx=wzListSpeakers.length-1;wzHighlight=idx;const items=document.querySelectorAll('#wzSpkList .spkitem');items.forEach((el,i)=>{el.classList.toggle('highlight',i===idx);});const hit=items[idx];if(hit)hit.scrollIntoView({block:'nearest',behavior:'smooth'});}
-// User tapped/clicked a speaker directly. Also collapses any pending
-// earlier steps (rotation-direction check) so we don't strand them
-// "pending" on a wizard the user already advanced past by touch.
-function wzClickPickAt(idx){if(!wzListSpeakers[idx])return;if(wzStep<2){wzStep=2;wzRender();if(!wzSpeakerLoaded){wzSpeakerLoaded=true;}}wzHighlight=idx;const s=wzListSpeakers[idx];document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('picked',i===idx);el.classList.toggle('highlight',i===idx);});wzPickSpeaker(s.ip,s.name);wzStep=-1;}
+function wzRender(){document.querySelectorAll('#wzstage .step').forEach(s=>{let n=parseInt(s.dataset.wzstep,10);s.classList.toggle('cur',n===wzStep);s.classList.toggle('gone',n<wzStep);});let pips=document.getElementById('wzpips');if(pips)pips.innerHTML=wzPipsHTML(wzStep);}
+function wzAdvance(target){wzStep=target;wzRender();if(wzStep===1){fetch('/api/rotnet/reset').catch(()=>{});}if(wzStep===2&&!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}if(wzStep===3){wzEnterVolStep3=-1;}}
+function wzSetHighlight(idx){if(!wzListSpeakers.length)return;if(idx<0)idx=0;if(idx>=wzListSpeakers.length)idx=wzListSpeakers.length-1;wzHighlight=idx;document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('highlight',i===idx);});}
 function runWizardTick(d){
   let rn=document.getElementById('wzroom'),hl=document.getElementById('wzhost');
   if(rn)rn.textContent=(d.roomLabel&&d.roomLabel.length>0)?d.roomLabel:(d.roomSlug&&d.roomSlug.length>0?d.roomSlug:'Unassigned');
   if(hl)hl.textContent=(d.host||'sonos-p4')+'.local';
-  if(wzStep===1&&typeof d.rotationNet==='number'){let cnt=document.getElementById('wzCwCnt'),h1=document.getElementById('wzh1');if(cnt)cnt.textContent=Math.max(0,d.rotationNet);if(d.rotationNet>=2){if(h1){h1.textContent='direction set';h1.classList.add('ok');}setTimeout(()=>wzAdvance(2),700);wzStep=-1;}else if(d.rotationNet<=-2){fetch('/api/setinvert?v='+(d.inv?'0':'1')).then(()=>fetch('/api/rotnet/reset')).catch(()=>{});if(h1)h1.textContent='direction flipped — turn again';}else if(d.rotationNet>0){if(h1)h1.textContent='';}}
+  // Firmware line in the wizard banner — surfaces version + update state
+  // even when we're stuck inside the wizard (no landing to see it on).
+  let wfv=document.getElementById('wzFwVer');if(wfv&&d.fwver)wfv.textContent='v'+d.fwver;
+  let wub=document.getElementById('wzFwUpd'),wul=document.getElementById('wzFwUpdLbl');
+  if(wub&&wul){
+    const mid=d.updStatus==='downloading'||d.updStatus==='installing'||d.updStatus==='rebooting';
+    const avail=d.updLatest&&semverNewer(d.updLatest,d.fwver);
+    wub.classList.remove('busy','avail');
+    if(mid){wub.classList.add('busy');wul.textContent=d.updStatus;}
+    else if(avail){wub.classList.add('avail');wul.textContent='v'+d.updLatest+' ready — tap to install';}
+    else{wul.textContent='check for updates';}
+  }
+  if(wzStep===0&&d.firedGid&&d.firedSince>=0&&d.firedSince<3000){if(/^[1-5]c$/.test(d.firedGid)){let h0=document.getElementById('wzh0');if(h0)h0.textContent='✓ here we go';setTimeout(()=>wzAdvance(1),500);wzStep=-1;}}
+  if(wzStep===1&&typeof d.rotationNet==='number'){let cnt=document.getElementById('wzCwCnt'),h1=document.getElementById('wzh1');if(cnt)cnt.textContent=Math.max(0,d.rotationNet);if(d.rotationNet>=2){if(h1)h1.textContent='direction set';setTimeout(()=>wzAdvance(2),700);wzStep=-1;}else if(d.rotationNet<=-2){fetch('/api/setinvert?v='+(d.inv?'0':'1')).then(()=>fetch('/api/rotnet/reset')).catch(()=>{});if(h1)h1.textContent='direction flipped — turn again';}else if(d.rotationNet>0){if(h1)h1.textContent='';}}
   if(wzStep===2&&typeof d.rotationFine==='number'){let delta=d.rotationFine-wzPickRotBase;if(delta!==0&&wzListSpeakers.length>0){wzSetHighlight(wzHighlight+delta);wzPickRotBase=d.rotationFine;let h2=document.getElementById('wzh2');if(h2&&wzListSpeakers[wzHighlight])h2.textContent=wzListSpeakers[wzHighlight].name;}if(d.firedGid&&d.firedSince>=0&&d.firedSince<3000){if(/^[1-5]c$/.test(d.firedGid)&&wzListSpeakers[wzHighlight]){let s=wzListSpeakers[wzHighlight];document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('picked',i===wzHighlight);});wzPickSpeaker(s.ip,s.name);wzStep=-1;}}}
-  if(wzStep===3&&typeof d.rotationFine==='number'){if(wzEnterRotStep3===null)wzEnterRotStep3=d.rotationFine;let delta=Math.abs(d.rotationFine-wzEnterRotStep3);let numEl=document.getElementById('wzVolNum');if(numEl)numEl.textContent=Math.min(delta,5);if(delta>=5){let h3=document.getElementById('wzh3');if(h3){h3.classList.add('ok');h3.textContent='volume rotation confirmed';}setTimeout(()=>wzFinish(),900);wzStep=-1;}}
+  if(wzStep===3&&typeof d.vol==='number'){if(wzEnterVolStep3<0)wzEnterVolStep3=d.vol;let fillEl=document.getElementById('wzGaugeFill'),numEl=document.getElementById('wzVolNum');if(numEl)numEl.textContent=d.vol;if(fillEl)fillEl.style.strokeDashoffset=565-(d.vol/100)*565;if(Math.abs(d.vol-wzEnterVolStep3)>=5){let h3=document.getElementById('wzh3');if(h3){h3.classList.add('ok');h3.textContent='volume changed';}setTimeout(()=>wzFinish(),1200);wzStep=-1;}}
 }
-function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{const list=(d&&Array.isArray(d.list))?d.list:[];const wrap=document.getElementById('wzSpkList');if(!wrap)return;if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;padding:12px">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}wzListSpeakers=list;let h='';for(let i=0;i<list.length;i++){const s=list[i];h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'" onclick="wzClickPickAt('+i+')"><div class="sname">'+esc(s.name)+'</div><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div></div>';}wrap.innerHTML=h;fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});let h2=document.getElementById('wzh2');if(h2&&list.length>0)h2.textContent='turn or tap to choose';}).catch(()=>{});}
-function wzPickSpeaker(ip,name){fetch('/api/select?ip='+encodeURIComponent(ip)+'&name='+encodeURIComponent(name)).then(()=>{let h2=document.getElementById('wzh2');if(h2){h2.textContent='✓ paired with '+name;h2.classList.add('ok');}setTimeout(()=>wzAdvance(3),700);});}
+function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{const list=(d&&Array.isArray(d.list))?d.list:[];const wrap=document.getElementById('wzSpkList');if(!wrap)return;if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:center">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}wzListSpeakers=list;let h='';for(let i=0;i<list.length;i++){const s=list[i];h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'"><div><div class="sname">'+esc(s.name)+'</div><div class="sip">'+esc(s.ip)+'</div></div><div class="chk">✓</div></div>';}wrap.innerHTML=h;fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});let h2=document.getElementById('wzh2');if(h2&&list.length>0)h2.textContent=list[0].name;}).catch(()=>{});}
+function wzPickSpeaker(ip,name){fetch('/api/select?ip='+encodeURIComponent(ip)+'&name='+encodeURIComponent(name)).then(()=>{let h2=document.getElementById('wzh2');if(h2)h2.textContent='✓ paired with '+name;setTimeout(()=>wzAdvance(3),800);});}
 function wzFinish(){fetch('/api/wizard/done',{method:'POST'}).then(()=>{location.href='/';});}
-if(typeof document!=='undefined'){document.addEventListener('DOMContentLoaded',()=>{let pips=document.getElementById('wzpips');if(pips&&!pips.innerHTML)pips.innerHTML=wzPipsHTML(1);wzRender();if(!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}});}
-function reRunWizard(){if(!confirm('Restart the install wizard?'))return;wzStep=1;wzSpeakerLoaded=false;wzEnterRotStep3=null;fetch('/api/wizard/reset',{method:'POST'}).then(()=>{location.href='/?wizard=1';});}
+function wzKickUpdate(){const b=document.getElementById('wzFwUpd'),l=document.getElementById('wzFwUpdLbl');if(b)b.classList.add('busy');if(l)l.textContent='checking…';fetch('/api/checkupdate?force=1').then(()=>setTimeout(poll,900)).catch(()=>{if(l)l.textContent='check failed';if(b)b.classList.remove('busy');});}
+if(typeof document!=='undefined'){document.addEventListener('DOMContentLoaded',()=>{let pips=document.getElementById('wzpips');if(pips&&!pips.innerHTML)pips.innerHTML=wzPipsHTML(0);});}
+function reRunWizard(){if(!confirm('Restart the install wizard?'))return;wzStep=0;wzSpeakerLoaded=false;fetch('/api/wizard/reset',{method:'POST'}).then(()=>{location.href='/?wizard=1';});}
 const SHOW_WIZARD=new URLSearchParams(location.search).has('wizard');
 function toggleAdvanced(){let w=document.getElementById('advancedwrap'),btn=document.getElementById('advexp');let open=!w.classList.contains('show');w.classList.toggle('show',open);btn.classList.toggle('open',open);}
 
