@@ -228,7 +228,7 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
 /* Volume gauge */
 .gauge-wrap{display:flex;justify-content:center;align-items:center;padding:10px 0 2px;position:relative}
 .gauge-wrap::before{content:"";position:absolute;width:226px;height:226px;border-radius:50%;border:1px solid var(--line);box-shadow:inset 0 1px 16px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.03);pointer-events:none}
-.gauge{position:relative;width:196px;height:196px;cursor:ns-resize;touch-action:none}
+.gauge{position:relative;width:196px;height:196px;cursor:ns-resize;touch-action:pan-y}
 .gauge svg{width:100%;height:100%;overflow:visible}
 .gauge .track{fill:none;stroke:var(--rail);stroke-width:7;stroke-linecap:round}
 .gauge .fill{fill:none;stroke:var(--accent-2);stroke-width:7;stroke-linecap:round;
@@ -865,12 +865,19 @@ function updateActivityReadout(d){
   }
 }
 
-// ── Wizard engine (unchanged firmware contract) ──
+// ── Wizard engine ─────────────────────────────────────────────────────
+// Sequential steps 0→1→2→3, one visible at a time. During steps 0/1/2
+// firmware suppresses ALL knob input (setupComplete=false + wizardVolumeTest=false).
+// On entry to step 3 the client POSTs /api/wizard/voltest?on=1 to unlock
+// volume rotation ONLY, so the installer sees the paired Sonos actually
+// respond as proof of pairing. Clicks stay blocked throughout.
 let wzStep=0,wzSpeakerLoaded=false,wzEnterVolStep3=-1,wzListSpeakers=[],wzHighlight=0,wzPickRotBase=0;
 function wzPipsHTML(cur){let h='';for(let i=1;i<=3;i++){let cls='pip';if(i<cur)cls+=' done';if(i===cur)cls+=' cur';h+='<div class="'+cls+'"></div>';}return h;}
 function wzRender(){document.querySelectorAll('#wzstage .step').forEach(s=>{let n=parseInt(s.dataset.wzstep,10);s.classList.toggle('cur',n===wzStep);s.classList.toggle('gone',n<wzStep);});let pips=document.getElementById('wzpips');if(pips)pips.innerHTML=wzPipsHTML(wzStep);}
-function wzAdvance(target){wzStep=target;wzRender();if(wzStep===1){fetch('/api/rotnet/reset').catch(()=>{});}if(wzStep===2&&!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}if(wzStep===3){wzEnterVolStep3=-1;}}
-function wzSetHighlight(idx){if(!wzListSpeakers.length)return;if(idx<0)idx=0;if(idx>=wzListSpeakers.length)idx=wzListSpeakers.length-1;wzHighlight=idx;document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('highlight',i===idx);});}
+function wzAdvance(target){wzStep=target;wzRender();if(wzStep===1){fetch('/api/rotnet/reset').catch(()=>{});}if(wzStep===2&&!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}if(wzStep===3){wzEnterVolStep3=-1;fetch('/api/wizard/voltest?on=1').catch(()=>{});}}
+function wzSetHighlight(idx){if(!wzListSpeakers.length)return;if(idx<0)idx=0;if(idx>=wzListSpeakers.length)idx=wzListSpeakers.length-1;wzHighlight=idx;const items=document.querySelectorAll('#wzSpkList .spkitem');items.forEach((el,i)=>{el.classList.toggle('highlight',i===idx);});const hit=items[idx];if(hit)hit.scrollIntoView({block:'nearest',behavior:'smooth'});}
+// Direct tap/click on a speaker row — only reachable when step 2 is visible.
+function wzClickPickAt(idx){if(!wzListSpeakers[idx])return;wzHighlight=idx;const s=wzListSpeakers[idx];document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('picked',i===idx);el.classList.toggle('highlight',i===idx);});wzPickSpeaker(s.ip,s.name);wzStep=-1;}
 function runWizardTick(d){
   let rn=document.getElementById('wzroom'),hl=document.getElementById('wzhost');
   if(rn)rn.textContent=(d.roomLabel&&d.roomLabel.length>0)?d.roomLabel:(d.roomSlug&&d.roomSlug.length>0?d.roomSlug:'Unassigned');
@@ -892,12 +899,12 @@ function runWizardTick(d){
   if(wzStep===2&&typeof d.rotationFine==='number'){let delta=d.rotationFine-wzPickRotBase;if(delta!==0&&wzListSpeakers.length>0){wzSetHighlight(wzHighlight+delta);wzPickRotBase=d.rotationFine;let h2=document.getElementById('wzh2');if(h2&&wzListSpeakers[wzHighlight])h2.textContent=wzListSpeakers[wzHighlight].name;}if(d.firedGid&&d.firedSince>=0&&d.firedSince<3000){if(/^[1-5]c$/.test(d.firedGid)&&wzListSpeakers[wzHighlight]){let s=wzListSpeakers[wzHighlight];document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('picked',i===wzHighlight);});wzPickSpeaker(s.ip,s.name);wzStep=-1;}}}
   if(wzStep===3&&typeof d.vol==='number'){if(wzEnterVolStep3<0)wzEnterVolStep3=d.vol;let fillEl=document.getElementById('wzGaugeFill'),numEl=document.getElementById('wzVolNum');if(numEl)numEl.textContent=d.vol;if(fillEl)fillEl.style.strokeDashoffset=565-(d.vol/100)*565;if(Math.abs(d.vol-wzEnterVolStep3)>=5){let h3=document.getElementById('wzh3');if(h3){h3.classList.add('ok');h3.textContent='volume changed';}setTimeout(()=>wzFinish(),1200);wzStep=-1;}}
 }
-function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{const list=(d&&Array.isArray(d.list))?d.list:[];const wrap=document.getElementById('wzSpkList');if(!wrap)return;if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:center">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}wzListSpeakers=list;let h='';for(let i=0;i<list.length;i++){const s=list[i];h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'"><div><div class="sname">'+esc(s.name)+'</div><div class="sip">'+esc(s.ip)+'</div></div><div class="chk">✓</div></div>';}wrap.innerHTML=h;fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});let h2=document.getElementById('wzh2');if(h2&&list.length>0)h2.textContent=list[0].name;}).catch(()=>{});}
-function wzPickSpeaker(ip,name){fetch('/api/select?ip='+encodeURIComponent(ip)+'&name='+encodeURIComponent(name)).then(()=>{let h2=document.getElementById('wzh2');if(h2)h2.textContent='✓ paired with '+name;setTimeout(()=>wzAdvance(3),800);});}
-function wzFinish(){fetch('/api/wizard/done',{method:'POST'}).then(()=>{location.href='/';});}
+function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{const list=(d&&Array.isArray(d.list))?d.list:[];const wrap=document.getElementById('wzSpkList');if(!wrap)return;if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;padding:12px">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}wzListSpeakers=list;let h='';for(let i=0;i<list.length;i++){const s=list[i];h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'" onclick="wzClickPickAt('+i+')"><div class="sname">'+esc(s.name)+'</div><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div></div>';}wrap.innerHTML=h;fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});let h2=document.getElementById('wzh2');if(h2&&list.length>0)h2.textContent='turn or tap to choose';}).catch(()=>{});}
+function wzPickSpeaker(ip,name){fetch('/api/select?ip='+encodeURIComponent(ip)+'&name='+encodeURIComponent(name)).then(()=>{let h2=document.getElementById('wzh2');if(h2){h2.textContent='✓ paired with '+name;h2.classList.add('ok');}setTimeout(()=>wzAdvance(3),700);});}
+function wzFinish(){fetch('/api/wizard/voltest?on=0').catch(()=>{}).finally(()=>fetch('/api/wizard/done',{method:'POST'}).then(()=>{location.href='/';}));}
 function wzKickUpdate(){const b=document.getElementById('wzFwUpd'),l=document.getElementById('wzFwUpdLbl');if(b)b.classList.add('busy');if(l)l.textContent='checking…';fetch('/api/checkupdate?force=1').then(()=>setTimeout(poll,900)).catch(()=>{if(l)l.textContent='check failed';if(b)b.classList.remove('busy');});}
 if(typeof document!=='undefined'){document.addEventListener('DOMContentLoaded',()=>{let pips=document.getElementById('wzpips');if(pips&&!pips.innerHTML)pips.innerHTML=wzPipsHTML(0);});}
-function reRunWizard(){if(!confirm('Restart the install wizard?'))return;wzStep=0;wzSpeakerLoaded=false;fetch('/api/wizard/reset',{method:'POST'}).then(()=>{location.href='/?wizard=1';});}
+function reRunWizard(){if(!confirm('Restart the install wizard?'))return;wzStep=0;wzSpeakerLoaded=false;wzEnterVolStep3=-1;fetch('/api/wizard/voltest?on=0').catch(()=>{}).finally(()=>fetch('/api/wizard/reset',{method:'POST'}).then(()=>{location.href='/?wizard=1';}));}
 const SHOW_WIZARD=new URLSearchParams(location.search).has('wizard');
 function toggleAdvanced(){let w=document.getElementById('advancedwrap'),btn=document.getElementById('advexp');let open=!w.classList.contains('show');w.classList.toggle('show',open);btn.classList.toggle('open',open);}
 
@@ -960,17 +967,50 @@ function onStepCommit(v){fetch('/api/setstep?v='+v).then(()=>{stepDragging=false
 function cmd(action){fetch('/api/'+action).then(()=>setTimeout(poll,200));}
 let volTimer=null;
 function sendVol(v){if(volTimer)clearTimeout(volTimer);volTimer=setTimeout(()=>{fetch('/api/vol?v='+v).then(()=>poll());},80);}
+// Gauge drag — click-and-drag adjusts Sonos volume. Two behaviours:
+//   Mouse: cursor-changes on hover, immediate drag on mousedown. Slow ratio
+//     (6 px per volume unit) so a full 100-unit sweep is ~600 px — deliberate.
+//   Touch: DELIBERATE gesture only. Touchstart just arms a 250 ms hold timer;
+//     if the finger moves >10 px before the timer fires, we cancel and let
+//     the browser pan-scroll the page instead. This is why touch-action is
+//     pan-y (not none) — a quick swipe on the gauge scrolls; a long-press-
+//     then-drag adjusts volume. Without this, any finger-scroll landing on
+//     the gauge was moving the Sonos.
 let g=document.getElementById('gauge');
-let dragY=null,dragStartVol=0;
-function gStart(y){dragY=y;dragStartVol=lastVol||0;}
-function gMove(y){if(dragY===null)return;let dy=dragY-y;let target=Math.max(0,Math.min(100,dragStartVol+Math.round(dy/2)));if(target!==lastVol){setGauge(target,false);lastVol=target;sendVol(target);}}
-function gEnd(){if(dragY===null)return;dragY=null;fetch('/api/vol?v='+lastVol).then(()=>poll());}
-g.addEventListener('mousedown',e=>{e.preventDefault();gStart(e.clientY);});
+let dragY=null,dragStartVol=0,dragStartY=null,dragArmTimer=null;
+function gStartMouse(y){dragY=y;dragStartVol=lastVol||0;dragStartY=y;}
+function gStartTouch(y){
+  dragY=null;                  // not armed yet
+  dragStartY=y;
+  dragStartVol=lastVol||0;
+  clearTimeout(dragArmTimer);
+  dragArmTimer=setTimeout(()=>{ if(dragStartY!==null){dragY=dragStartY;} },250);
+}
+function gMove(y){
+  if(dragStartY===null)return;
+  if(dragY===null){
+    // Touch pre-arm: if finger moved before hold-timer fires, cancel drag.
+    if(Math.abs(y-dragStartY)>10){clearTimeout(dragArmTimer);dragStartY=null;}
+    return;
+  }
+  let dy=dragY-y;
+  let target=Math.max(0,Math.min(100,dragStartVol+Math.round(dy/6)));
+  if(target!==lastVol){setGauge(target,false);lastVol=target;sendVol(target);}
+}
+function gEnd(){
+  clearTimeout(dragArmTimer);
+  if(dragY!==null){dragY=null;fetch('/api/vol?v='+lastVol).then(()=>poll());}
+  dragStartY=null;
+}
+g.addEventListener('mousedown',e=>{e.preventDefault();gStartMouse(e.clientY);});
 window.addEventListener('mousemove',e=>gMove(e.clientY));
 window.addEventListener('mouseup',gEnd);
-g.addEventListener('touchstart',e=>{e.preventDefault();gStart(e.touches[0].clientY);},{passive:false});
-g.addEventListener('touchmove',e=>{e.preventDefault();gMove(e.touches[0].clientY);},{passive:false});
+// Touch: no preventDefault on touchstart — let browser decide scroll vs drag.
+// Only preventDefault touchmove AFTER we've locked into drag (dragY!=null).
+g.addEventListener('touchstart',e=>{gStartTouch(e.touches[0].clientY);},{passive:true});
+g.addEventListener('touchmove',e=>{if(dragY!==null)e.preventDefault();gMove(e.touches[0].clientY);},{passive:false});
 g.addEventListener('touchend',gEnd);
+g.addEventListener('touchcancel',gEnd);
 
 let allActions=[],gestureMappings={};
 const GESTURES=[
