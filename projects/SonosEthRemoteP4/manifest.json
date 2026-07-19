@@ -1,8 +1,8 @@
 {
-  "version": "1.0.42",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.42/SonosEthRemoteP4-v1.0.42.bin",
-  "sha256": "455becfde3c6f31db25af9b87b0ed1ddc97a25988a62f791e942f1212b960232",
-  "size": 1098736,
-  "released": "2026-07-15T17:27:51Z",
-  "notes": "Wizard step 3 unstuck + main-UI volume drag calmed. Step 3 was stuck because v1.0.40's setupComplete gate blocked ALL knob rotation, but the client still watched d.vol which therefore never changed. Fix: new firmware flag wizardVolumeTest that permits VOLUME-mode rotation ONLY when the wizard client asks for it via /api/wizard/voltest?on=1 on step-3 entry. Bass/Treble/clicks stay blocked. Step 3 now sees the paired Sonos actually respond as proof of pairing. Speaker list improvements finally shipped: names only, tap-or-click any row to select, scrollIntoView follows the knob highlight. /api/wizard/reset now also clears speakers[] and paired-speaker NVS. Main-UI volume gauge: drag ratio slowed 3x and touch drag needs a 250ms hold to arm — quick finger-swipe scrolls the page, deliberate press-and-drag adjusts volume."
+  "version": "1.0.43",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.43/SonosEthRemoteP4-v1.0.43.bin",
+  "sha256": "e448dd1c7f1b7c671e8355db9d325fc37405c16629cb1cfc67929965305c41ac",
+  "size": 1104224,
+  "released": "2026-07-19T16:11:11Z",
+  "notes": "Rename UX and speaker-picker prioritization. (1) Room-rename shows an animated 'applying new name…' state under the room label and polls /api/status until the new slug lands (up to 30s, ignores the ~15s reboot gap). Previously the click-to-rename fired /api/setroom which reboots the board, and the UI just sat with the old label until the next successful poll — no visible feedback that anything was happening. Prefix (hostname) rename gets the same visual treatment plus an explicit 'reopen the fleet dashboard to find its new .local' message since the URL itself becomes stale. (2) Wizard step 2 speaker picker now sorts by similarity to the board's room label — exact match after normalize scores 1000, one string containing the other adds 30, otherwise word-set Jaccard overlap (with 'room'/'the'/'a'/'and' stripped as generic). Top match gets a 'closest' chip so the installer knows why it's first, not alphabetical accident. Board named 'Office' pairing with Sonos zone 'Office' is now a one-tap decision."
 }

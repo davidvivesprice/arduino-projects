@@ -112,6 +112,16 @@ body{
 .roomname{font-family:var(--serif);font-size:27px;font-weight:400;line-height:1.05;letter-spacing:.2px;color:var(--ink);cursor:pointer;transition:color .2s}
 .roomname:hover{color:var(--accent-3)}
 .roomname.unassigned{font-style:italic;color:var(--accent-3);font-size:16px;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono)}
+/* Applying-rename state — shown while the board is writing NVS and restarting.
+   Rename triggers a hard reset (see serveApiSetRoom); without visual feedback
+   the page just sits with the OLD label until the board comes back and the
+   next poll succeeds — the user assumes nothing happened. Pulses "applying…"
+   under the room name until pollUntilRoomSlug detects the new slug. */
+.roomname.applying{opacity:.55;pointer-events:none}
+.roomname.applying::after{content:"applying new name …";display:block;font-family:var(--mono);font-size:9.5px;font-weight:400;color:var(--accent-2);letter-spacing:2px;text-transform:uppercase;margin-top:6px;animation:applyingPulse 1.15s ease-in-out infinite}
+@keyframes applyingPulse{0%,100%{opacity:.4}50%{opacity:1}}
+/* Speaker picker "closest match" chip in the wizard */
+.spkitem .spksug{display:inline-flex;align-items:center;font-family:var(--mono);font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-2);border:1px solid var(--accent-line);background:var(--accent-wash);border-radius:99px;padding:2px 7px;margin-left:8px;flex-shrink:0;vertical-align:middle}
 .hostline{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:2px;text-align:center;text-transform:lowercase;cursor:pointer;transition:color .2s;white-space:nowrap}
 .hostline:hover{color:var(--ink-2)}
 .fwline{font-family:var(--mono);font-size:9.5px;font-weight:400;color:var(--ink-3);text-align:center;letter-spacing:2px;margin-top:10px;text-transform:uppercase;white-space:nowrap}
@@ -872,6 +882,31 @@ function updateActivityReadout(d){
 // volume rotation ONLY, so the installer sees the paired Sonos actually
 // respond as proof of pairing. Clicks stay blocked throughout.
 let wzStep=0,wzSpeakerLoaded=false,wzEnterVolStep3=-1,wzListSpeakers=[],wzHighlight=0,wzPickRotBase=0;
+let wzRoomLabel='';   // stashed from /api/status polls; drives similarity sort in step 2
+// Rank a Sonos zone name by how likely it's THIS board's intended pairing,
+// given the board's own room label. The heuristic mirrors installer intuition:
+//   exact match (normalized)      → 1000
+//   one string contains the other → strong signal (30-pt bonus)
+//   word-set Jaccard overlap      → 0-100 base
+// "room" is stripped as a generic word so "Master Bedroom" doesn't inflate-
+// match "Living Room" via the shared word. Returns 0 on either-side empty.
+function wzSimScore(spkName, roomLabel){
+  if(!spkName || !roomLabel) return 0;
+  const norm = s => s.toLowerCase().replace(/\(.*?\)/g,' ').replace(/[^\w\s]/g,' ').replace(/\s+/g,' ').trim();
+  const spkN = norm(spkName), rmN = norm(roomLabel);
+  if(!spkN || !rmN) return 0;
+  if(spkN === rmN) return 1000;
+  const generic = new Set(['room','the','a','and','of']);
+  const wordSet = s => new Set(s.split(' ').filter(w => w.length>1 && !generic.has(w)));
+  const a = wordSet(rmN), b = wordSet(spkN);
+  if(a.size===0 || b.size===0) return 0;
+  let common = 0;
+  for(const w of a) if(b.has(w)) common++;
+  if(common === 0) return 0;
+  const jaccard = common / (a.size + b.size - common);
+  const substr = (spkN.includes(rmN) || rmN.includes(spkN)) ? 30 : 0;
+  return Math.round(jaccard * 100) + substr;
+}
 function wzPipsHTML(cur){let h='';for(let i=1;i<=3;i++){let cls='pip';if(i<cur)cls+=' done';if(i===cur)cls+=' cur';h+='<div class="'+cls+'"></div>';}return h;}
 function wzRender(){document.querySelectorAll('#wzstage .step').forEach(s=>{let n=parseInt(s.dataset.wzstep,10);s.classList.toggle('cur',n===wzStep);s.classList.toggle('gone',n<wzStep);});let pips=document.getElementById('wzpips');if(pips)pips.innerHTML=wzPipsHTML(wzStep);}
 function wzAdvance(target){wzStep=target;wzRender();if(wzStep===1){fetch('/api/rotnet/reset').catch(()=>{});}if(wzStep===2&&!wzSpeakerLoaded){wzSpeakerLoaded=true;wzLoadSpeakers();}if(wzStep===3){wzEnterVolStep3=-1;fetch('/api/wizard/voltest?on=1').catch(()=>{});}}
@@ -882,6 +917,11 @@ function runWizardTick(d){
   let rn=document.getElementById('wzroom'),hl=document.getElementById('wzhost');
   if(rn)rn.textContent=(d.roomLabel&&d.roomLabel.length>0)?d.roomLabel:(d.roomSlug&&d.roomSlug.length>0?d.roomSlug:'Unassigned');
   if(hl)hl.textContent=(d.host||'sonos-p4')+'.local';
+  // Stash the room label so wzLoadSpeakers (which fires from a different
+  // request lifecycle) can sort by similarity. Fall back to slug if label
+  // isn't set — a fresh board with slug="office" still gives us "office".
+  if(d.roomLabel) wzRoomLabel = d.roomLabel;
+  else if(d.roomSlug) wzRoomLabel = d.roomSlug;
   // Firmware line in the wizard banner — surfaces version + update state
   // even when we're stuck inside the wizard (no landing to see it on).
   let wfv=document.getElementById('wzFwVer');if(wfv&&d.fwver)wfv.textContent='v'+d.fwver;
@@ -899,7 +939,33 @@ function runWizardTick(d){
   if(wzStep===2&&typeof d.rotationFine==='number'){let delta=d.rotationFine-wzPickRotBase;if(delta!==0&&wzListSpeakers.length>0){wzSetHighlight(wzHighlight+delta);wzPickRotBase=d.rotationFine;let h2=document.getElementById('wzh2');if(h2&&wzListSpeakers[wzHighlight])h2.textContent=wzListSpeakers[wzHighlight].name;}if(d.firedGid&&d.firedSince>=0&&d.firedSince<3000){if(/^[1-5]c$/.test(d.firedGid)&&wzListSpeakers[wzHighlight]){let s=wzListSpeakers[wzHighlight];document.querySelectorAll('#wzSpkList .spkitem').forEach((el,i)=>{el.classList.toggle('picked',i===wzHighlight);});wzPickSpeaker(s.ip,s.name);wzStep=-1;}}}
   if(wzStep===3&&typeof d.vol==='number'){if(wzEnterVolStep3<0)wzEnterVolStep3=d.vol;let fillEl=document.getElementById('wzGaugeFill'),numEl=document.getElementById('wzVolNum');if(numEl)numEl.textContent=d.vol;if(fillEl)fillEl.style.strokeDashoffset=565-(d.vol/100)*565;if(Math.abs(d.vol-wzEnterVolStep3)>=5){let h3=document.getElementById('wzh3');if(h3){h3.classList.add('ok');h3.textContent='volume changed';}setTimeout(()=>wzFinish(),1200);wzStep=-1;}}
 }
-function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{const list=(d&&Array.isArray(d.list))?d.list:[];const wrap=document.getElementById('wzSpkList');if(!wrap)return;if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;padding:12px">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}wzListSpeakers=list;let h='';for(let i=0;i<list.length;i++){const s=list[i];h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'" onclick="wzClickPickAt('+i+')"><div class="sname">'+esc(s.name)+'</div><div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div></div>';}wrap.innerHTML=h;fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});let h2=document.getElementById('wzh2');if(h2&&list.length>0)h2.textContent='turn or tap to choose';}).catch(()=>{});}
+function wzLoadSpeakers(){fetch('/api/speakers').then(r=>r.json()).then(d=>{
+  const list=(d&&Array.isArray(d.list))?d.list:[];
+  const wrap=document.getElementById('wzSpkList');if(!wrap)return;
+  if(list.length===0){wrap.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;padding:12px">Discovering…</div>';fetch('/api/discover').then(()=>setTimeout(wzLoadSpeakers,2500));return;}
+  // Sort by name-similarity to this board's room label so the obvious pick
+  // (e.g. board="Office" → Sonos zone "Office") floats to the top. Preserves
+  // discovery order as a stable-sort tie-breaker. Top match gets a "closest"
+  // chip if the score is meaningfully above zero, so the installer knows why
+  // it's first (not just alphabetical accident).
+  const scores = list.map(s => wzSimScore(s.name, wzRoomLabel));
+  const indexed = list.map((s,i) => ({s, i, sc: scores[i]}));
+  indexed.sort((a,b) => b.sc - a.sc || a.i - b.i);
+  const sorted = indexed.map(x => x.s);
+  wzListSpeakers=sorted;
+  let h='';
+  for(let i=0;i<sorted.length;i++){
+    const s=sorted[i];
+    const isSuggested = (i===0 && indexed[0].sc >= 30);
+    h+='<div class="spkitem'+(i===wzHighlight?' highlight':'')+'" data-idx="'+i+'" onclick="wzClickPickAt('+i+')">'+
+       '<div class="sname">'+esc(s.name)+(isSuggested?'<span class="spksug">closest</span>':'')+'</div>'+
+       '<div class="chk"><svg viewBox="0 0 24 24"><path d="M5 12.5l5 5 9-11"/></svg></div>'+
+     '</div>';
+  }
+  wrap.innerHTML=h;
+  fetch('/api/rotnet/reset').then(()=>{wzPickRotBase=0;}).catch(()=>{});
+  let h2=document.getElementById('wzh2');if(h2&&sorted.length>0)h2.textContent='turn or tap to choose';
+}).catch(()=>{});}
 function wzPickSpeaker(ip,name){fetch('/api/select?ip='+encodeURIComponent(ip)+'&name='+encodeURIComponent(name)).then(()=>{let h2=document.getElementById('wzh2');if(h2){h2.textContent='✓ paired with '+name;h2.classList.add('ok');}setTimeout(()=>wzAdvance(3),700);});}
 function wzFinish(){fetch('/api/wizard/voltest?on=0').catch(()=>{}).finally(()=>fetch('/api/wizard/done',{method:'POST'}).then(()=>{location.href='/';}));}
 function wzKickUpdate(){const b=document.getElementById('wzFwUpd'),l=document.getElementById('wzFwUpdLbl');if(b)b.classList.add('busy');if(l)l.textContent='checking…';fetch('/api/checkupdate?force=1').then(()=>setTimeout(poll,900)).catch(()=>{if(l)l.textContent='check failed';if(b)b.classList.remove('busy');});}
@@ -955,8 +1021,55 @@ function pollSlow(){
 }
 function sel(ip,nm){fetch('/api/select?ip='+ip+'&name='+encodeURIComponent(nm)).then(()=>{poll();pollSlow();});}
 function disc(){fetch('/api/discover');setTimeout(()=>{pollSlow();},4000);}
-function renameRoom(){let n=prompt('Room name or slug (e.g. mstbed):');if(!n)return;let slug=n.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,16);if(!slug){alert('Invalid name — use letters, digits, hyphens.');return;}fetch('/api/setroom?slug='+encodeURIComponent(slug)).then(()=>setTimeout(poll,400));}
-function renameHost(){let p=prompt('Hostname prefix (e.g. tpsvc, phil):');if(p===null)return;let pfx=p.trim().toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);if(!pfx){alert('Invalid prefix — use letters, digits, hyphens.');return;}fetch('/api/setprefix?p='+encodeURIComponent(pfx)).then(()=>setTimeout(poll,400));}
+// Poll /api/status every 800ms up to `timeoutMs` waiting for the roomSlug
+// field to match `expected`. Handles the reboot gap gracefully — fetch errors
+// during the ~10-15s while ETH re-negotiates are IGNORED, not treated as
+// failures. Rename and prefix change both trigger ESP.restart(), so this is
+// the only reliable "did the change land" signal from the browser side.
+function pollUntilRoomSlug(expected, timeoutMs){
+  const start = Date.now();
+  return new Promise((resolve, reject) => {
+    const tick = () => {
+      fetch('/api/status',{cache:'no-store'}).then(r=>r.json()).then(d=>{
+        if(d.roomSlug === expected){ resolve(d); return; }
+        if(Date.now() - start > timeoutMs){ reject(new Error('timeout')); return; }
+        setTimeout(tick, 800);
+      }).catch(()=>{
+        if(Date.now() - start > timeoutMs){ reject(new Error('timeout')); return; }
+        setTimeout(tick, 800);
+      });
+    };
+    setTimeout(tick, 500);  // small head-start; board is mid-reboot
+  });
+}
+function renameRoom(){
+  let n=prompt('Room name or slug (e.g. mstbed):');if(!n)return;
+  let slug=n.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,16);
+  if(!slug){alert('Invalid name — use letters, digits, hyphens.');return;}
+  const el=document.getElementById('roomname');
+  if(el)el.classList.add('applying');
+  fetch('/api/setroom?slug='+encodeURIComponent(slug))
+    .then(()=>pollUntilRoomSlug(slug,30000))
+    .then(()=>poll())
+    .catch(()=>{alert('Rename sent, but the board isn\'t reporting the new name yet. Refresh the page in a few seconds.');})
+    .finally(()=>{if(el)el.classList.remove('applying');});
+}
+function renameHost(){
+  let p=prompt('Hostname prefix (e.g. tpsvc, phil):');if(p===null)return;
+  let pfx=p.trim().toLowerCase().replace(/[^a-z0-9-]/g,'').slice(0,16);
+  if(!pfx){alert('Invalid prefix — use letters, digits, hyphens.');return;}
+  const el=document.getElementById('roomname');
+  if(el)el.classList.add('applying');
+  // Prefix change also reboots the board AND swaps the hostname — the current
+  // page URL will point at the OLD .local and stop resolving. Give the user
+  // an escape hatch after 14s (typical reboot + ETH + mDNS advertise).
+  fetch('/api/setprefix?p='+encodeURIComponent(pfx))
+    .then(()=>{setTimeout(()=>{
+      if(el)el.classList.remove('applying');
+      alert('Prefix changed. Board is restarting under a new hostname — reopen the fleet dashboard to find its new .local.');
+    },14000);})
+    .catch(()=>{if(el)el.classList.remove('applying');});
+}
 function toggleInv(){let cur=document.getElementById('invtgl').classList.contains('on');fetch('/api/setinvert?v='+(cur?'0':'1')).then(poll);}
 function identifyBoard(){let ls=document.getElementById('lspeaker');if(ls){ls.style.transition='color .2s';let prev=ls.style.color;ls.style.color='#e0c25c';setTimeout(()=>{ls.style.color=prev;},1600);}fetch('/api/identify').then(r=>r.json()).then(j=>{if(j&&j.err){alert('Could not identify: '+j.err);}}).catch(()=>{});}
 function kickUpdate(){fetch('/api/checkupdate?force=1').then(()=>setTimeout(poll,800));}
