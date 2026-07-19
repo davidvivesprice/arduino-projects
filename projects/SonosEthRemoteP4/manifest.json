@@ -1,8 +1,8 @@
 {
-  "version": "1.0.44",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.44/SonosEthRemoteP4-v1.0.44.bin",
-  "sha256": "7a3e7e02e5b3c5908a289ac3da87711d4f2e1173554ac80b26ba3448ce6f1245",
-  "size": 1107856,
-  "released": "2026-07-19T16:20:53Z",
-  "notes": "Auto-resume on empty Play — per-zone. When a play gesture fires and the paired Sonos has an empty transport (nothing loaded / queue cleared), the board restores the last stable source URI it saw playing on that zone and re-fires Play. Snapshot happens in refreshState() from GetMediaInfo whenever a stable-format URI is seen — x-sonosapi (favorites/stations), x-rincon-mp3radio (legacy internet radio), x-rincon-cpcontainer (Sonos playlists), x-sonos-http, x-file-cifs (SMB), plain http(s). Queue tokens (x-rincon-queue) are deliberately NOT snapshotted — they reference session-local queues that go stale. Stored per-board in NVS (single lastURI + lastMeta pair; board is 1:1 with a zone). Wiped on pairing change in selectSpeaker() and on /api/reset + /api/wizard/reset. Static cache in refreshState() prevents an NVS write on every 5s poll — only writes when the URI actually changes. Behavior: press play on a knob you've never touched in a week, and it starts playing whatever was last playing there."
+  "version": "1.0.45",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.45/SonosEthRemoteP4-v1.0.45.bin",
+  "sha256": "a4dfb40d3db3ecb4b7dd265d564986923b5c93e52e3aa48c9b74d4f32a840bbb",
+  "size": 1118272,
+  "released": "2026-07-19T17:11:46Z",
+  "notes": "Gesture -> Play favorite or URL. New action play_uri: loads a specific source (Sonos favorite or arbitrary stream URL) via SetAVTransportURI then Play. Firmware pieces: SonosController.cd() for ContentDirectory SOAP; browseFavorites() parses FV:2 into {title, uri, meta} tuples, honoring the res-with-attributes tag shape (tagAny helper). /api/favorites returns the list as JSON with metadata inline (single round-trip per gesture-fire — no re-browse at play time). Mapping param is 'URI' or 'URI\\nMETA' — DIDL meta is required for cloud content (Sonos rejects 714 without it) and omitted for raw stream URLs. Client: gesture picker sprouts an inline editor when play_uri is selected — text input for raw URL plus a scrollable Sonos favorites list. Save applies the composite param via existing /api/setmap. Auto-resume snapshot piggybacks: the URI you fire from a gesture becomes the zone's fallback for empty-Play too."
 }

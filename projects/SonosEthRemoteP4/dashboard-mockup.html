@@ -381,6 +381,24 @@ body.live-bare .livepanel{border:none;background:none;box-shadow:none;padding:10
 .gestrow .picker .pickhdr.suggested{color:var(--accent-3)}
 .gestrow .picker .pickdesc{font-family:var(--sans);font-size:11.5px;line-height:1.45;color:var(--ink-2);padding:4px 12px 10px;border-left:2px solid var(--accent-line);margin:0 0 6px 10px}
 
+/* play_uri editor — expanded inline under the play_uri pickitem when the
+   user clicks it. Two entry paths coexist: paste-a-URL and pick-a-favorite.
+   Save button applies the composite param (URI + optional DIDL meta) via
+   the existing /api/setmap route. */
+.gestrow .picker .pickparam{padding:8px 10px 10px;border-left:2px solid var(--accent-line);margin:2px 0 8px 10px;display:flex;flex-direction:column;gap:8px}
+.gestrow .picker .pickparam .row{display:flex;gap:6px;align-items:stretch}
+.gestrow .picker .pickparam input[type=text]{flex:1;min-width:0;font-family:var(--mono);font-size:12px;background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);outline:none}
+.gestrow .picker .pickparam input[type=text]:focus{border-color:var(--accent-line);box-shadow:0 0 0 1px var(--accent-line)}
+.gestrow .picker .pickparam .btn{flex-shrink:0;font-family:var(--mono);font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;background:transparent;border:1px solid var(--line);border-radius:8px;padding:6px 12px;color:var(--ink-2);cursor:pointer;transition:border-color .18s,color .18s,background .18s}
+.gestrow .picker .pickparam .btn:hover{border-color:var(--accent-line);color:var(--accent-2)}
+.gestrow .picker .pickparam .btn.primary{background:var(--accent-wash);border-color:var(--accent-line);color:var(--accent-2)}
+.gestrow .picker .pickparam .favs{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;background:var(--inset);padding:4px}
+.gestrow .picker .pickparam .fav-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--ink);gap:8px}
+.gestrow .picker .pickparam .fav-item:hover{background:var(--accent-wash)}
+.gestrow .picker .pickparam .fav-item.chosen{background:var(--ok-wash);color:var(--ok)}
+.gestrow .picker .pickparam .favs-empty{padding:12px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:1px}
+.gestrow .picker .pickparam .actions{display:flex;gap:6px;justify-content:flex-end}
+
 /* Gesture-fired flash */
 @keyframes flashOk{0%{background:rgba(89,201,122,.4);box-shadow:inset 0 0 24px rgba(89,201,122,.35)}100%{background:transparent;box-shadow:none}}
 @keyframes flashFail{0%{background:rgba(214,90,85,.4);box-shadow:inset 0 0 24px rgba(214,90,85,.35)}100%{background:transparent;box-shadow:none}}
@@ -1159,10 +1177,45 @@ function renderGestures(){
         if(chosen)cls+=' chosen';if(usedBy.length>0&&!chosen)cls+=' used';
         if(idx===0&&suggested.length>0)h+="  <div class='pickhdr suggested'>Suggested</div>";
         if(idx===suggested.length&&suggested.length>0&&!emittedHeader){h+="  <div class='pickhdr'>More</div>";emittedHeader=true;}
-        h+="  <div class='"+cls+"' onclick='setMap(\""+g.id+"\",\""+a.id+"\")'><span>"+a.label+"</span><span class='actid'>"+a.id+"</span>";
+        // play_uri needs a URI/meta parameter — click opens an inline editor
+        // instead of firing setMap immediately. Every other action stays as
+        // the direct-fire pattern.
+        const onclickAttr = (a.id==='play_uri')
+          ? "openPlayUriEditor(\""+g.id+"\")"
+          : "setMap(\""+g.id+"\",\""+a.id+"\")";
+        h+="  <div class='"+cls+"' onclick='"+onclickAttr+"'><span>"+a.label+"</span><span class='actid'>"+a.id+"</span>";
         if(usedBy.length>0)h+="   <span class='usedhint'>used by "+usedBy.join(', ')+"</span>";
         h+="  </div>";
         if(chosen&&a.desc)h+="  <div class='pickdesc'>"+a.desc+"</div>";
+        // Inline editor panel for play_uri — only for the currently-editing gesture.
+        if(a.id==='play_uri'&&playUriEditor&&playUriEditor.gid===g.id){
+          const uriEsc = (playUriEditor.uri||'').replace(/"/g,'&quot;');
+          h+="  <div class='pickparam'>";
+          h+="   <div class='row'>";
+          h+="    <input type='text' placeholder='paste stream URL, or pick a favorite below' value=\""+uriEsc+"\" oninput='onPlayUriInput(this.value)'>";
+          h+="    <button class='btn' onclick='refreshFavorites()' title='Re-fetch Sonos favorites'>↻</button>";
+          h+="   </div>";
+          // Favorites list — lazy-loaded on editor open
+          if(playUriFavLoading){
+            h+="   <div class='favs-empty'>loading Sonos favorites…</div>";
+          }else if(playUriFavorites===null){
+            h+="   <div class='favs-empty'>loading…</div>";
+          }else if(playUriFavorites.length===0){
+            h+="   <div class='favs-empty'>no favorites in Sonos yet — add some in the Sonos app, or paste a URL above</div>";
+          }else{
+            h+="   <div class='favs'>";
+            playUriFavorites.forEach((f,fi)=>{
+              const isCur = f.uri === playUriEditor.uri;
+              h+="    <div class='fav-item"+(isCur?' chosen':'')+"' onclick='pickFavorite("+fi+")'><span>"+esc(f.title)+"</span></div>";
+            });
+            h+="   </div>";
+          }
+          h+="   <div class='actions'>";
+          h+="    <button class='btn' onclick='cancelPlayUri()'>cancel</button>";
+          h+="    <button class='btn primary' onclick='savePlayUri()'>save</button>";
+          h+="   </div>";
+          h+="  </div>";
+        }
       });
       h+=" </div>";
     }
@@ -1171,9 +1224,54 @@ function renderGestures(){
   document.getElementById('gestureBody').innerHTML=h;
   renderVocab();
 }
-function toggleGesture(gid){openGesture=(openGesture===gid)?null:gid;renderGestures();}
-function setMap(gid,aid,p){fetch('/api/setmap?g='+encodeURIComponent(gid)+'&a='+encodeURIComponent(aid)+'&p='+encodeURIComponent(p||'')).then(()=>{openGesture=null;loadMappings();});}
-function clearMap(gid){fetch('/api/setmap?g='+encodeURIComponent(gid)+'&a=default').then(()=>{openGesture=null;loadMappings();});}
+function toggleGesture(gid){openGesture=(openGesture===gid)?null:gid;playUriEditor=null;renderGestures();}
+function setMap(gid,aid,p){fetch('/api/setmap?g='+encodeURIComponent(gid)+'&a='+encodeURIComponent(aid)+'&p='+encodeURIComponent(p||'')).then(()=>{openGesture=null;playUriEditor=null;loadMappings();});}
+function clearMap(gid){fetch('/api/setmap?g='+encodeURIComponent(gid)+'&a=default').then(()=>{openGesture=null;playUriEditor=null;loadMappings();});}
+// ── play_uri inline editor ──────────────────────────────────────────────
+// Two entry paths, one param: either the user picks a Sonos favorite (which
+// gives us URI + DIDL meta) or they paste a raw stream URL (URI only). The
+// composite is stored as "URI\nMETA" — same format the firmware parses in
+// runAction. Favorites are lazy-fetched once per session; refreshFavorites()
+// forces a re-Browse if the client has changed things in the Sonos app.
+let playUriEditor=null, playUriFavorites=null, playUriFavLoading=false;
+function openPlayUriEditor(gid){
+  const m=gestureMappings[gid]||{};
+  let uri='',meta='';
+  if(m.action==='play_uri'&&m.param){
+    const nl=m.param.indexOf('\n');
+    if(nl>=0){uri=m.param.substring(0,nl);meta=m.param.substring(nl+1);}
+    else uri=m.param;
+  }
+  playUriEditor={gid,uri,meta};
+  renderGestures();
+  loadFavoritesLazy();
+}
+function loadFavoritesLazy(){
+  if(playUriFavorites!==null||playUriFavLoading)return;
+  playUriFavLoading=true;
+  fetch('/api/favorites').then(r=>r.json()).then(d=>{
+    playUriFavorites=(d&&Array.isArray(d.list))?d.list:[];
+    playUriFavLoading=false;
+    renderGestures();
+  }).catch(()=>{playUriFavorites=[];playUriFavLoading=false;renderGestures();});
+}
+function refreshFavorites(){playUriFavorites=null;loadFavoritesLazy();renderGestures();}
+function pickFavorite(idx){
+  if(!playUriEditor||!playUriFavorites||!playUriFavorites[idx])return;
+  const f=playUriFavorites[idx];
+  playUriEditor.uri=f.uri;playUriEditor.meta=f.meta||'';
+  renderGestures();
+}
+function onPlayUriInput(v){if(!playUriEditor)return;playUriEditor.uri=v;playUriEditor.meta='';}
+function savePlayUri(){
+  if(!playUriEditor)return;
+  const uri=(playUriEditor.uri||'').trim();
+  if(!uri){alert('Enter a URL or pick a Sonos favorite first.');return;}
+  const meta=playUriEditor.meta||'';
+  const param=meta?uri+'\n'+meta:uri;
+  setMap(playUriEditor.gid,'play_uri',param);
+}
+function cancelPlayUri(){playUriEditor=null;renderGestures();}
 /* Vocab chip strip + Knob Activity headline were consolidated into the
    .livepanel motion icon in the design polish; updateMotionIcon now
    carries that signal alone. The helper functions are kept inert as
