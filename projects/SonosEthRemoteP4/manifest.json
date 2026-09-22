@@ -1,8 +1,10 @@
 {
-  "version": "1.0.45",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.45/SonosEthRemoteP4-v1.0.45.bin",
-  "sha256": "a4dfb40d3db3ecb4b7dd265d564986923b5c93e52e3aa48c9b74d4f32a840bbb",
-  "size": 1118272,
-  "released": "2026-07-19T17:11:46Z",
-  "notes": "Gesture -> Play favorite or URL. New action play_uri: loads a specific source (Sonos favorite or arbitrary stream URL) via SetAVTransportURI then Play. Firmware pieces: SonosController.cd() for ContentDirectory SOAP; browseFavorites() parses FV:2 into {title, uri, meta} tuples, honoring the res-with-attributes tag shape (tagAny helper). /api/favorites returns the list as JSON with metadata inline (single round-trip per gesture-fire — no re-browse at play time). Mapping param is 'URI' or 'URI\\nMETA' — DIDL meta is required for cloud content (Sonos rejects 714 without it) and omitted for raw stream URLs. Client: gesture picker sprouts an inline editor when play_uri is selected — text input for raw URL plus a scrollable Sonos favorites list. Save applies the composite param via existing /api/setmap. Auto-resume snapshot piggybacks: the URI you fire from a gesture becomes the zone's fallback for empty-Play too."
+  "version": "1.0.46",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.46/SonosEthRemoteP4-v1.0.46.bin",
+  "sha256": "2e1216ad5012f54498471f34f66d1613d16c8566073408dc79332d2286b49ff3",
+  "size": 1118416,
+  "released": "2026-09-22T16:39:25Z",
+  "notes": "Fix: network services self-start when the link comes up. ethConnected now tracks the live ETH state instead of a boot-time snapshot, so a DHCP lease arriving after initEthernet's 15s timeout no longer leaves the board pingable but headless with OTA disabled. All seven Vineyard boards hit this simultaneously on 2026-09-22 after a power event and each needed a physical cycle; a late lease or a cable/switch bounce now self-recovers.",
+  "sourceCommit": "02aee6b1c1e36add13088d9f1e9ceb0096f68807",
+  "sourceDirty": false
 }
