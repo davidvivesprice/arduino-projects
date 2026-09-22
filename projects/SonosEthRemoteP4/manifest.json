@@ -1,10 +1,10 @@
 {
-  "version": "1.0.46",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.46/SonosEthRemoteP4-v1.0.46.bin",
-  "sha256": "2e1216ad5012f54498471f34f66d1613d16c8566073408dc79332d2286b49ff3",
-  "size": 1118416,
-  "released": "2026-09-22T16:39:25Z",
-  "notes": "Fix: network services self-start when the link comes up. ethConnected now tracks the live ETH state instead of a boot-time snapshot, so a DHCP lease arriving after initEthernet's 15s timeout no longer leaves the board pingable but headless with OTA disabled. All seven Vineyard boards hit this simultaneously on 2026-09-22 after a power event and each needed a physical cycle; a late lease or a cable/switch bounce now self-recovers.",
-  "sourceCommit": "02aee6b1c1e36add13088d9f1e9ceb0096f68807",
+  "version": "1.0.47",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.47/SonosEthRemoteP4-v1.0.47.bin",
+  "sha256": "eb25c17f56986c8e4b44780c9dd188a4a03a3d6788881d0a7071a6f9c637f796",
+  "size": 1121184,
+  "released": "2026-09-22T16:58:44Z",
+  "notes": "Fix: Sonos multi zone addressing. A multi hosts several zones behind one IP separated only by port (:1400/:1500/:1600/:1700); discovery threw the port away and all SOAP hardcoded :1400, so three of four zones were unreachable and the UI showed one room while another changed volume. Port is now carried through discovery, persistence, control and coordinator resolution, and /api/select keys on zone name. Also: a board no longer auto-grabs speakers[0] when its assigned zone is missing -- it holds the assignment, warns, and retries every 30s until the zone returns or you assign another.",
+  "sourceCommit": "385515ccebe493f6b5221cb26b7bedcf842c9291",
   "sourceDirty": false
 }
