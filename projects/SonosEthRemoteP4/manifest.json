@@ -1,10 +1,10 @@
 {
-  "version": "1.0.47",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.47/SonosEthRemoteP4-v1.0.47.bin",
-  "sha256": "eb25c17f56986c8e4b44780c9dd188a4a03a3d6788881d0a7071a6f9c637f796",
-  "size": 1121184,
-  "released": "2026-09-22T16:58:44Z",
-  "notes": "Fix: Sonos multi zone addressing. A multi hosts several zones behind one IP separated only by port (:1400/:1500/:1600/:1700); discovery threw the port away and all SOAP hardcoded :1400, so three of four zones were unreachable and the UI showed one room while another changed volume. Port is now carried through discovery, persistence, control and coordinator resolution, and /api/select keys on zone name. Also: a board no longer auto-grabs speakers[0] when its assigned zone is missing -- it holds the assignment, warns, and retries every 30s until the zone returns or you assign another.",
-  "sourceCommit": "385515ccebe493f6b5221cb26b7bedcf842c9291",
+  "version": "1.0.48",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.48/SonosEthRemoteP4-v1.0.48.bin",
+  "sha256": "829aebe2880b506e0379640705f20c97fd6a7e89919c65d10008e90b29b81cd3",
+  "size": 1121408,
+  "released": "2026-09-22T17:06:08Z",
+  "notes": "Fix: SOAP body was assembled into a 600-byte buffer, leaving 311 bytes for parameters after envelope overhead. Short calls always fit; setURI() does not -- a Sonos favorite's DIDL-Lite metadata was silently truncated into malformed XML, so play_uri gestures and auto-resume failed against real cloud content while working fine with a bare stream URL. Body is now a String. Also reports spkIp/spkPort to the fleet hub so the dashboard can distinguish a multi's zones, which all share one IP.",
+  "sourceCommit": "4dc16ddb889b12b23eae2b3f3c7599f95c8141b7",
   "sourceDirty": false
 }
