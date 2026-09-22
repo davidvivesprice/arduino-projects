@@ -1,10 +1,10 @@
 {
-  "version": "1.0.48",
-  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.48/SonosEthRemoteP4-v1.0.48.bin",
-  "sha256": "829aebe2880b506e0379640705f20c97fd6a7e89919c65d10008e90b29b81cd3",
-  "size": 1121408,
-  "released": "2026-09-22T17:06:08Z",
-  "notes": "Fix: SOAP body was assembled into a 600-byte buffer, leaving 311 bytes for parameters after envelope overhead. Short calls always fit; setURI() does not -- a Sonos favorite's DIDL-Lite metadata was silently truncated into malformed XML, so play_uri gestures and auto-resume failed against real cloud content while working fine with a bare stream URL. Body is now a String. Also reports spkIp/spkPort to the fleet hub so the dashboard can distinguish a multi's zones, which all share one IP.",
-  "sourceCommit": "4dc16ddb889b12b23eae2b3f3c7599f95c8141b7",
+  "version": "1.0.49",
+  "url": "https://github.com/davidvivesprice/arduino-projects/releases/download/sonos-eth-p4-v1.0.49/SonosEthRemoteP4-v1.0.49.bin",
+  "sha256": "fe029869a616f97b191286052d26ab547b0c4f021b2fa1e55d2776da9c35feb6",
+  "size": 1122832,
+  "released": "2026-09-22T18:44:09Z",
+  "notes": "Boards now report their visible Sonos zone list and accept a zone assignment from the fleet dashboard. The hub has no route into the board's LAN, so assignment piggybacks on the reply to the status POST the board already makes: the hub attaches a command, the board applies it and confirms via its next report. Zone picker now lives on fleet.vivessato.com next to each board.",
+  "sourceCommit": "7658efd8bfdfbbb93d3da4177a3176fb1eee8da0",
   "sourceDirty": false
 }
